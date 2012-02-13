@@ -34,7 +34,7 @@
 	if((self = [super initWithFrame:frame]))
 	{
 		knob = [[TUIView alloc] initWithFrame:CGRectMake(0, 0, 12, 12)];
-		knob.layer.cornerRadius = 4.0;
+		knob.layer.cornerRadius = 3.5;
 		knob.userInteractionEnabled = NO;
 		knob.backgroundColor = [TUIColor blackColor];
 		[self addSubview:knob];
@@ -73,12 +73,26 @@
 	
 	if([self isVertical]) {
 		KNOB_CALCULATIONS(y, height, DEFAULT_MIN_KNOB_SIZE)
+    
 		CGRect frame;
 		frame.origin.x = 0.0;
 		frame.origin.y = knobOffset;
 		frame.size.height = MIN(2000, knobLength);
-		frame.size.width = trackBounds.size.width;
-		knob.frame = ABRectRoundOrigin(CGRectInset(frame, 2, 4));
+		frame.size.width = 11;//trackBounds.size.width;
+		frame = ABRectRoundOrigin(CGRectInset(frame, 2, 4));
+    if(!CGRectEqualToRect(frame, knob.frame)) {
+      if(_hideKnobTimer) {
+        [_hideKnobTimer invalidate], _hideKnobTimer = nil;
+      }
+      _hideKnobTimer = [NSTimer scheduledTimerWithTimeInterval:1
+                                                        target:self 
+                                                      selector:@selector(_hideKnob) 
+                                                      userInfo:nil 
+                                                       repeats:NO];
+      _knobHidden = NO;
+      [self _updateKnobColor:0.01];
+    }
+    knob.frame = frame;
 	} else {
 		KNOB_CALCULATIONS(x, width, DEFAULT_MIN_KNOB_SIZE)
 		CGRect frame;
@@ -89,6 +103,12 @@
 		knob.frame = ABRectRoundOrigin(CGRectInset(frame, 4, 2));
 	}
 	
+}
+
+- (void)_hideKnob {
+  _hideKnobTimer = nil;
+  _knobHidden = YES;
+  [self _updateKnobColor:0.2];
 }
 
 - (void)layoutSubviews
@@ -130,7 +150,10 @@
 {
 	[TUIView beginAnimations:nil context:NULL];
 	[TUIView setAnimationDuration:duration];
-	knob.alpha = _scrollKnobFlags.active?0.6:_scrollKnobFlags.hover?0.33:0.18;
+  if(_knobHidden)
+    knob.alpha = 0.0;
+  else
+    knob.alpha = 0.5;
 	[TUIView commitAnimations];
 }
 

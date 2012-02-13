@@ -24,6 +24,8 @@
 	TUIView *knob;
 	CGPoint _mouseDown;
 	CGRect _knobStartFrame;
+  NSTimer *_hideKnobTimer;
+  BOOL _knobHidden;
 	
 	struct {
 		unsigned int hover:1;
