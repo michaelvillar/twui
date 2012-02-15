@@ -24,15 +24,17 @@ CGSize AB_CTLineGetSize(CTLineRef line)
 	return CGSizeMake(ceil(width), ceil(height));
 }
 
-CGSize AB_CTFrameGetSize(CTFrameRef frame)
+CGSize AB_CTFrameGetSize(CTFrameRef frame, BOOL shouldAddOneLine)
 {
 	CGFloat h = 0.0;
 	CGFloat w = 0.0;
 	NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
+  CGFloat lastLineH = 0.0;
 	for(id line in lines) {
 		CGSize s = AB_CTLineGetSize((__bridge CTLineRef)line);
 		if(s.width > w)
 			w = s.width;
+    lastLineH = s.height;
 	}
 	
 	// Mostly based off http://lists.apple.com/archives/quartz-dev/2008/Mar/msg00079.html
@@ -50,7 +52,10 @@ CGSize AB_CTFrameGetSize(CTFrameRef frame)
 		CGFloat ascent, descent, leading;
 		CTLineGetTypographicBounds(lastLine, &ascent, &descent, &leading);
 		h = CGRectGetMaxY(frameRect) - lastLineOrigin.y + descent;
-	}
+
+	  if(shouldAddOneLine)
+      h += lastLineH;
+  }
 	
 	return CGSizeMake(ceil(w), ceil(h));
 }
@@ -137,12 +142,12 @@ static inline BOOL RangeContainsIndex(CFRange range, CFIndex index)
 	return (a && b);
 }
 
-void AB_CTFrameGetRectsForRange(CTFrameRef frame, CFRange range, CGRect rects[], CFIndex *rectCount)
+void AB_CTFrameGetRectsForRange(NSString *string, CTFrameRef frame, CFRange range, CGRect rects[], CFIndex *rectCount)
 {
-	AB_CTFrameGetRectsForRangeWithAggregationType(frame, range, AB_CTLineRectAggregationTypeInline, rects, rectCount);
+	AB_CTFrameGetRectsForRangeWithAggregationType(string, frame, range, AB_CTLineRectAggregationTypeInline, rects, rectCount);
 }
 
-void AB_CTFrameGetRectsForRangeWithAggregationType(CTFrameRef frame, CFRange range, AB_CTLineRectAggregationType aggregationType, CGRect rects[], CFIndex *rectCount)
+void AB_CTFrameGetRectsForRangeWithAggregationType(NSString *string, CTFrameRef frame, CFRange range, AB_CTLineRectAggregationType aggregationType, CGRect rects[], CFIndex *rectCount)
 {
 	CGRect bounds;
 	CGPathIsRect(CTFrameGetPath(frame), &bounds);
@@ -152,6 +157,15 @@ void AB_CTFrameGetRectsForRangeWithAggregationType(CTFrameRef frame, CFRange ran
 	
 	CFIndex startIndex = range.location;
 	CFIndex endIndex = startIndex + range.length;
+  
+  BOOL startIndexNextLine = NO;
+//  BOOL endIndexNextLine = NO;
+  BOOL startIndexShouldBeNextLine = NO;
+  if(startIndex > 0 && startIndex <= [string length])
+    startIndexShouldBeNextLine = ([[string substringWithRange:NSMakeRange(startIndex - 1, 1)] isEqualToString:@"\n"]);
+//  BOOL endIndexShouldBeNextLine = NO;
+//  if(endIndex > 0 && endIndex <= [string length])
+//    endIndexShouldBeNextLine = ([[string substringWithRange:NSMakeRange(endIndex - 1, 1)] isEqualToString:@"\n"]);
 	
 	NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
 	CFIndex linesCount = [lines count];
@@ -173,7 +187,28 @@ void AB_CTFrameGetRectsForRangeWithAggregationType(CTFrameRef frame, CFRange ran
 		CFIndex lineEndIndex = lineStartIndex + lineRange.length;
 		BOOL containsStartIndex = RangeContainsIndex(lineRange, startIndex);
 		BOOL containsEndIndex = RangeContainsIndex(lineRange, endIndex);
-
+    if(containsStartIndex && startIndexShouldBeNextLine) {
+      containsStartIndex = NO;
+      startIndexNextLine = YES;
+    }
+      
+    if(startIndexNextLine) {
+      if(i == linesCount - 1) {
+        line_y -= lineHeight;
+      }
+      else {
+        lineOrigin = lineOrigins[i+1];
+        line_y = lineOrigin.y - descent + bounds.origin.y;
+      }
+      
+      CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x, line_y, 1, lineHeight);
+      rects[rectIndex++] = r;
+      startIndexNextLine = NO;
+      
+      if(startIndex == endIndex) {
+        goto end;
+      }
+    }
 		if(containsStartIndex && containsEndIndex) {
 			CGFloat startOffset = CTLineGetOffsetForStringIndex(line, startIndex, NULL);
 			CGFloat endOffset = CTLineGetOffsetForStringIndex(line, endIndex, NULL);

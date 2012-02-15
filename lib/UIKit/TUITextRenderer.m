@@ -185,7 +185,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 				CFIndex rectCount = 100;
 				CGRect rects[rectCount];
 				CFRange r = {range.location, range.length};
-				AB_CTFrameGetRectsForRangeWithAggregationType(f, r, (AB_CTLineRectAggregationType)[[self.attributedString attribute:TUIAttributedStringBackgroundFillStyleName atIndex:range.location effectiveRange:NULL] integerValue], rects, &rectCount);
+				AB_CTFrameGetRectsForRangeWithAggregationType([self.attributedString string],f, r, (AB_CTLineRectAggregationType)[[self.attributedString attribute:TUIAttributedStringBackgroundFillStyleName atIndex:range.location effectiveRange:NULL] integerValue], rects, &rectCount);
 				TUIAttributedStringPreDrawBlock block = value;
 				block(self.attributedString, range, rects, rectCount);
 				
@@ -205,7 +205,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 				CFIndex rectCount = 100;
 				CGRect rects[rectCount];
 				CFRange r = {range.location, range.length};
-				AB_CTFrameGetRectsForRangeWithAggregationType(f, r, (AB_CTLineRectAggregationType)[[self.attributedString attribute:TUIAttributedStringBackgroundFillStyleName atIndex:range.location effectiveRange:NULL] integerValue], rects, &rectCount);
+				AB_CTFrameGetRectsForRangeWithAggregationType([self.attributedString string],f, r, (AB_CTLineRectAggregationType)[[self.attributedString attribute:TUIAttributedStringBackgroundFillStyleName atIndex:range.location effectiveRange:NULL] integerValue], rects, &rectCount);
 				for(CFIndex i = 0; i < rectCount; ++i) {
 					CGRect r = rects[i];
 					r = CGRectInset(r, -2, -1);
@@ -226,7 +226,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 			CFRange r = {_r.location, _r.length};
 			CFIndex nRects = 10;
 			CGRect rects[nRects];
-			AB_CTFrameGetRectsForRange(f, r, rects, &nRects);
+			AB_CTFrameGetRectsForRange([self.attributedString string],f, r, rects, &nRects);
 			for(int i = 0; i < nRects; ++i) {
 				CGRect rect = rects[i];
 				rect = CGRectInset(rect, -2, -1);
@@ -248,7 +248,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 			// draw (or mask) selection
 			CFIndex rectCount = 100;
 			CGRect rects[rectCount];
-			AB_CTFrameGetRectsForRange(f, selectedRange, rects, &rectCount);
+			AB_CTFrameGetRectsForRange([self.attributedString string],f, selectedRange, rects, &rectCount);
 			if(_flags.drawMaskDragSelection) {
 				CGContextClipToRects(context, rects, rectCount);
 			} else {
@@ -275,7 +275,10 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 - (CGSize)size
 {
 	if(attributedString) {
-		return AB_CTFrameGetSize([self ctFrame]);
+    BOOL addOneLine = NO;
+    if([attributedString length] > 0)
+      addOneLine = [[[attributedString string] substringFromIndex:[attributedString length] - 1] isEqualToString:@"\n"];
+		return AB_CTFrameGetSize([self ctFrame], addOneLine);
 	}
 	return CGSizeZero;
 }
@@ -311,7 +314,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 {
 	CFIndex rectCount = 1;
 	CGRect rects[rectCount];
-	AB_CTFrameGetRectsForRange([self ctFrame], range, rects, &rectCount);
+	AB_CTFrameGetRectsForRange([attributedString string],[self ctFrame], range, rects, &rectCount);
 	if(rectCount > 0) {
 		return rects[0];
 	}
@@ -322,7 +325,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 {
 	CFIndex rectCount = 100;
 	CGRect rects[rectCount];
-	AB_CTFrameGetRectsForRange([self ctFrame], range, rects, &rectCount);
+	AB_CTFrameGetRectsForRange([attributedString string],[self ctFrame], range, rects, &rectCount);
 	
 	NSMutableArray *wrappedRects = [NSMutableArray arrayWithCapacity:rectCount];
 	for(CFIndex i = 0; i < rectCount; i++) {

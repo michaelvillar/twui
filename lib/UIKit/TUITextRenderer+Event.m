@@ -235,7 +235,7 @@ normal:
 	if(range.length > 0) {
 		CFIndex rectCount = 100;
 		CGRect rects[rectCount];
-		AB_CTFrameGetRectsForRangeWithAggregationType(textFrame, range, AB_CTLineRectAggregationTypeBlock, rects, &rectCount);
+		AB_CTFrameGetRectsForRangeWithAggregationType([self.attributedString string], textFrame, range, AB_CTLineRectAggregationTypeBlock, rects, &rectCount);
 		
 		for(CFIndex i = 0; i < rectCount; ++i) {
 			CGRect rect = rects[i];
