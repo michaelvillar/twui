@@ -21,6 +21,9 @@
 #import "TUIKit.h"
 #import "CoreText+Additions.h"
 
+NSString *TUITextRendererDidBecomeFirstResponder = @"TUITextRendererDidBecomeFirstResponder";
+NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFirstResponder";
+
 @implementation TUITextRenderer
 
 @synthesize attributedString;
@@ -347,6 +350,20 @@
 - (void)setPreDrawBlocksEnabled:(BOOL)enabled
 {
 	_flags.preDrawBlocksEnabled = enabled;
+}
+
+- (BOOL)becomeFirstResponder
+{
+  [[NSNotificationCenter defaultCenter] postNotificationName:TUITextRendererDidBecomeFirstResponder 
+                                                      object:self];
+  return [super becomeFirstResponder];
+}
+
+- (BOOL)resignFirstResponder
+{
+  [[NSNotificationCenter defaultCenter] postNotificationName:TUITextRendererDidResignFirstResponder 
+                                                      object:self];
+  return [super resignFirstResponder];
 }
 
 @end

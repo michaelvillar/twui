@@ -17,6 +17,9 @@
 #import "TUIResponder.h"
 #import "ABActiveRange.h"
 
+extern NSString *TUITextRendererDidBecomeFirstResponder;
+extern NSString *TUITextRendererDidResignFirstResponder;
+
 @class TUIColor;
 @class TUIFont;
 @class TUIView;
