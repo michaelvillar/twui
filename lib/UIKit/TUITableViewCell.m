@@ -19,6 +19,12 @@
 #import "TUITableView+Cell.h"
 #import "TUINSWindow.h"
 
+@interface TUITableView ()
+
+-(BOOL)__isDraggingCell;
+
+@end
+
 @implementation TUITableViewCell
 
 - (void)setReuseIdentifier:(NSString *)r
@@ -109,13 +115,15 @@
 - (void)mouseUp:(NSEvent *)event
 {
 	[super mouseUp:event];
+  BOOL dragging = [self.tableView __isDraggingCell];
+  
   // notify our table view of the event
   [self.tableView __mouseUpInCell:self offset:_mouseOffset event:event];
   
 	_tableViewCellFlags.highlighted = 0;
 	[self setNeedsDisplay];
 	
-	if([self eventInside:event]) {
+	if([self eventInside:event] && !dragging) {
 		TUITableView *tableView = self.tableView;
 		if([tableView.delegate respondsToSelector:@selector(tableView:didClickRowAtIndexPath:withEvent:)]){
 			[tableView.delegate tableView:tableView didClickRowAtIndexPath:self.indexPath withEvent:event];
