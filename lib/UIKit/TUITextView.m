@@ -180,7 +180,6 @@ static CAAnimation *ThrobAnimation()
 	NSResponder *firstResponder = [self.nsWindow firstResponder];
 	if(firstResponder == self) {
 		// responder should be on the renderer
-		NSLog(@"making renderer first responder");
 		[self.nsWindow tui_makeFirstResponder:renderer];
 		firstResponder = renderer;
 	}
