@@ -198,6 +198,10 @@ typedef enum {
  */
 - (NSInteger)numberOfSectionsInTableView:(TUITableView *)tableView;
 
+- (void)tableView:(TUITableView*)tableView 
+applyStyleForCell:(TUITableViewCell*)cell
+      atIndexPath:(TUIFastIndexPath*)indexPath;
+
 @end
 
 @interface NSIndexPath (TUITableView)

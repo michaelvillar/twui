@@ -223,12 +223,19 @@
       }
     }
     
+    if([self.dataSource respondsToSelector:@selector(tableView:applyStyleForCell:atIndexPath:)])
+      [self.dataSource tableView:self 
+               applyStyleForCell:cell 
+                     atIndexPath:currentPath];
+    
     // update rows
     [self enumerateIndexPathsFromIndexPath:fromIndexPath toIndexPath:toIndexPath withOptions:0 usingBlock:^(TUIFastIndexPath *indexPath, BOOL *stop) {
       TUITableViewCell *displacedCell;
       if((displacedCell = [self cellForRowAtIndexPath:indexPath]) != nil && ![displacedCell isEqual:cell]){
         CGRect frame = [self rectForRowAtIndexPath:indexPath];
         CGRect target;
+          
+        int rowCell = (int)indexPath.row;
         
         if([indexPath isEqual:currentPath] && insertMethod == TUITableViewInsertionMethodAfterIndex){
           // the visited index path is the current index path and the insertion method is "after";
@@ -242,15 +249,23 @@
           // the visited index path is above the origin and below the current index path;
           // shift the cell down by the height of the dragged cell
           target = CGRectMake(frame.origin.x, frame.origin.y - cell.frame.size.height, frame.size.width, frame.size.height);
+          rowCell++;
         }else if([indexPath compare:currentPath] != NSOrderedDescending && [indexPath compare:cell.indexPath] == NSOrderedDescending){
           // the visited index path is below the origin and above the current index path;
           // shift the cell up by the height of the dragged cell
           target = CGRectMake(frame.origin.x, frame.origin.y + cell.frame.size.height, frame.size.width, frame.size.height);
+          rowCell--;
         }else{
           // the visited cell is outside the affected range and should be returned to its
           // normal frame
           target = frame;
         }
+        
+        if([self.dataSource respondsToSelector:@selector(tableView:applyStyleForCell:atIndexPath:)])
+          [self.dataSource tableView:self 
+                   applyStyleForCell:displacedCell 
+                         atIndexPath:[TUIFastIndexPath indexPathForRow:rowCell inSection:indexPath.section]];
+
         
         // only animate if we actually need to
         if(!CGRectEqualToRect(target, displacedCell.frame)){
