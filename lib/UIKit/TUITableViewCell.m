@@ -25,6 +25,10 @@
 
 @end
 
+@interface TUITableViewCell () <NSMenuDelegate>
+
+@end
+
 @implementation TUITableViewCell
 
 - (void)setReuseIdentifier:(NSString *)r
@@ -157,11 +161,14 @@
 
 - (NSMenu *)menuForEvent:(NSEvent *)event
 {
+  NSMenu *menu;
 	if([self.tableView.delegate respondsToSelector:@selector(tableView:menuForRowAtIndexPath:withEvent:)]) {
-		return [self.tableView.delegate tableView:self.tableView menuForRowAtIndexPath:self.indexPath withEvent:event];
+		menu = [self.tableView.delegate tableView:self.tableView menuForRowAtIndexPath:self.indexPath withEvent:event];
 	} else {
-		return [super menuForEvent:event];
+		menu = [super menuForEvent:event];
 	}
+  menu.delegate = self;
+  return menu;
 }
 
 - (BOOL)isHighlighted
@@ -201,6 +208,14 @@
 - (id)derepeaterIdentifier
 {
 	return nil;
+}
+
+// NSMenuDelegate Methods
+
+- (void)menuDidClose:(NSMenu *)menu
+{
+  _tableViewCellFlags.highlighted = 0;
+  [self setNeedsDisplay];
 }
 
 @end
