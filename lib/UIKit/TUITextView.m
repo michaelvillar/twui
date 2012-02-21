@@ -188,13 +188,8 @@ static CAAnimation *ThrobAnimation()
 
 - (void)drawRect:(CGRect)rect
 {
-	CGContextRef ctx = TUIGraphicsGetCurrentContext();
-	
 	if(drawFrame)
 		drawFrame(self, rect);
-	
-	BOOL singleLine = [self singleLine];
-	BOOL doMask = singleLine;
 	
 	CGRect textRect = [self textRect];
 	if(!CGRectEqualToRect(textRect, _lastTextRect)) {
@@ -202,16 +197,7 @@ static CAAnimation *ThrobAnimation()
 		_lastTextRect = textRect;
 	}
 	
-	if(doMask) {
-		CGContextSaveGState(ctx);
-		CGContextClipToRoundRect(ctx, self.bounds, floor(rect.size.height / 2));
-	}
-	
 	[renderer draw];
-	
-	if(doMask) {
-		CGContextRestoreGState(ctx);
-	}
 	
 	BOOL key = [self _isKey];
 	NSRange selection = [renderer selectedRange];
