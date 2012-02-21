@@ -285,8 +285,17 @@ normal:
 	return YES;
 }
 
+- (BOOL)becomeFirstResponder
+{
+  [[NSNotificationCenter defaultCenter] postNotificationName:TUITextRendererDidBecomeFirstResponder 
+                                                      object:self];
+  return [super becomeFirstResponder];
+}
+
 - (BOOL)resignFirstResponder
 {
+  [[NSNotificationCenter defaultCenter] postNotificationName:TUITextRendererDidResignFirstResponder 
+                                                      object:self];
 	[self resetSelection];
 	return YES;
 }
