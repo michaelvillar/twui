@@ -32,6 +32,7 @@
 	void(^_hyperCompletion)(BOOL);
 	
 	NSTrackingArea *_trackingArea;
+  NSMutableDictionary *_draggingTypesByViews;
 	
 	__unsafe_unretained TUITextRenderer *_tempTextRendererForTextInputClient; // weak, set temporarily while NSTextInputClient dicks around
 	
@@ -59,6 +60,9 @@
 - (BOOL)isHoveringView:(TUIView *)v; // only v
 
 - (void)ab_setIsOpaque:(BOOL)o; // don't use this
+
+- (void)registerForDraggedTypes:(NSArray *)newTypes
+                        forView:(TUIView*)view;
 
 @end
 

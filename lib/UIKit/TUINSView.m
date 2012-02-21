@@ -28,6 +28,7 @@
 {
 	if((self = [super initWithFrame:frameRect])) {
 		opaque = YES;
+    _draggingTypesByViews = [[NSMutableDictionary alloc] init];
 	}
 	return self;
 }
@@ -401,5 +402,67 @@
 #define ENABLE_NSTEXT_INPUT_CLIENT
 #import "TUINSView+NSTextInputClient.m"
 #undef ENABLE_NSTEXT_INPUT_CLIENT
+
+#pragma mark Dragging Stuffs
+- (void)registerForDraggedTypes:(NSArray *)newTypes
+                        forView:(TUIView*)view
+{
+  [_draggingTypesByViews setObject:newTypes forKey:[NSNumber numberWithUnsignedInteger:[view hash]]];
+  
+  NSMutableArray *types = [NSMutableArray array];
+  NSArray *keys = [_draggingTypesByViews allKeys];
+  NSObject *key;
+  NSObject *type;
+  for(key in keys) {
+    NSArray *viewTypes = [_draggingTypesByViews objectForKey:key];
+    for(type in viewTypes) {
+      if(![types containsObject:type])
+        [types addObject:type];
+    }
+  }
+  [self registerForDraggedTypes:types];
+}
+
+- (BOOL)prepareForDragOperation:(id < NSDraggingInfo >)sender
+{
+  return YES;
+}
+
+- (NSDragOperation)draggingEntered:(id < NSDraggingInfo >)sender 
+{
+	return NSDragOperationNone;
+}
+
+- (TUIView*)viewForDraggingInfo:(id < NSDraggingInfo >)sender 
+{
+  TUIView *view = [self viewForLocationInWindow:sender.draggingLocation];
+  while(view) 
+  {
+    NSArray *types = [_draggingTypesByViews objectForKey:[NSNumber numberWithUnsignedInteger:[view hash]]];
+    if(types) {
+      if([sender.draggingPasteboard availableTypeFromArray:types]) {
+        return view;
+      }
+    }
+    view = view.superview;
+  }
+  return nil;
+}
+
+- (NSDragOperation)draggingUpdated:(id < NSDraggingInfo >)sender 
+{
+  TUIView *view = [self viewForDraggingInfo:sender];
+  if(view)
+    return [view draggingUpdated:sender];
+  return NSDragOperationNone;
+}
+
+- (BOOL)performDragOperation:(id < NSDraggingInfo >)sender
+{
+  TUIView *view = [self viewForDraggingInfo:sender];
+  if(view)
+    return [view performDragOperation:sender];
+  return NO;
+}
 
 @end

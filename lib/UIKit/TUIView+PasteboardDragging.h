@@ -20,6 +20,11 @@
 
 @property (nonatomic, assign) BOOL pasteboardDraggingEnabled; // default NO
 
+- (void)registerForDraggedTypes:(NSArray*)types;
+- (void)_registerDraggingTypes;
+- (NSDragOperation)draggingUpdated:(id < NSDraggingInfo >)sender;
+- (BOOL)performDragOperation:(id < NSDraggingInfo >)sender;
+
 - (void)startPasteboardDragging;
 - (void)endPasteboardDragging:(NSDragOperation)operation;
 

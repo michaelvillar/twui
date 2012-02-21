@@ -108,6 +108,8 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 	NSString *accessibilityValue;
 	TUIAccessibilityTraits accessibilityTraits;
 	CGRect accessibilityFrame;
+  
+  NSArray *draggingTypes;
 }
 
 /**

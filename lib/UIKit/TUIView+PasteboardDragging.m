@@ -19,6 +19,29 @@
 
 @implementation TUIView (PasteboardDragging)
 
+- (void)registerForDraggedTypes:(NSArray*)types
+{
+  draggingTypes = types;
+  [self _registerDraggingTypes];
+}
+
+- (void)_registerDraggingTypes
+{
+  if(draggingTypes)
+    [self.nsView registerForDraggedTypes:draggingTypes
+                                 forView:self];
+}
+
+- (NSDragOperation)draggingUpdated:(id < NSDraggingInfo >)sender 
+{
+  return NSDragOperationNone;
+}
+
+- (BOOL)performDragOperation:(id < NSDraggingInfo >)sender
+{
+  return NO;
+}
+
 - (BOOL)pasteboardDraggingEnabled
 {
 	return _viewFlags.pasteboardDraggingEnabled;
