@@ -63,6 +63,7 @@
 @property (nonatomic, copy) NSString *placeholder;
 @property (nonatomic, strong) TUIFont *font;
 @property (nonatomic, strong) TUIColor *textColor;
+@property (nonatomic, strong) TUIColor *cursorColor;
 @property (nonatomic, assign) TUITextAlignment textAlignment;
 @property (nonatomic, assign) TUIEdgeInsets contentInset;
 

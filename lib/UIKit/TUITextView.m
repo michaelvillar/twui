@@ -33,6 +33,7 @@
 @synthesize drawFrame;
 @synthesize font;
 @synthesize textColor;
+@synthesize cursorColor;
 @synthesize textAlignment;
 @synthesize editable;
 @synthesize contentInset;
@@ -71,7 +72,7 @@
 		
 		cursor = [[TUIView alloc] initWithFrame:CGRectZero];
 		cursor.userInteractionEnabled = NO;
-		cursor.backgroundColor = [TUIColor linkColor];
+		cursorColor = cursor.backgroundColor = [TUIColor linkColor];
 		[self addSubview:cursor];
 		
 		self.font = [TUIFont fontWithName:@"HelveticaNeue" size:12];
@@ -124,6 +125,12 @@
 	textColor = c;
 	[self _updateDefaultAttributes];
 }	
+
+- (void)setCursorColor:(TUIColor *)c
+{
+  cursorColor = c;
+  cursor.backgroundColor = c;
+}
 
 - (void)setTextAlignment:(TUITextAlignment)t
 {
