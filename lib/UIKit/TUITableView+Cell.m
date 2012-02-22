@@ -49,6 +49,39 @@
  * If reordering is permitted by the table, this will begin a move operation.
  */
 -(void)__mouseDraggedCell:(TUITableViewCell *)cell offset:(CGPoint)offset event:(NSEvent *)event {
+  BOOL allowDraggingOut = NO;
+  TUIFastIndexPath *indexPath;
+  if([self.delegate respondsToSelector:@selector(tableView:shouldAllowDraggingOutAtIndexPath:)]
+     && [self.delegate respondsToSelector:@selector(tableView:dragOutAtIndexPath:event:offset:)]) 
+  {
+    indexPath = [self indexPathForCell:cell];
+    allowDraggingOut = [self.delegate tableView:self shouldAllowDraggingOutAtIndexPath:indexPath];
+  }
+  
+  if(allowDraggingOut) {
+    CGPoint point = [self convertPoint:event.locationInWindow
+                              fromView:nil];
+    if(point.x < -20 || point.x > self.bounds.size.width + 20 || 
+       point.y < -20 || point.y > self.bounds.size.height + 20) 
+    {
+      cell.highlighted = NO;
+      if([self __isDraggingCell]) {
+        [self reloadData];
+        // clear state
+        _currentDragToReorderIndexPath = nil;
+    
+        _previousDragToReorderIndexPath = nil;
+        
+        // and clean up
+        _dragToReorderCell = nil;
+        
+        _currentDragToReorderLocation = CGPointZero;
+        _currentDragToReorderMouseOffset = CGPointZero;
+      }
+      [self.delegate tableView:self dragOutAtIndexPath:indexPath event:event offset:offset];
+      return;
+    }
+  }
   [self __updateDraggingCell:cell offset:offset location:[[cell superview] localPointForEvent:event]];
 }
 

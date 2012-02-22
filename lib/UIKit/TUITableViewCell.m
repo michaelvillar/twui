@@ -176,6 +176,12 @@
 	return _tableViewCellFlags.highlighted;
 }
 
+- (void)setHighlighted:(BOOL)highlighted
+{
+  _tableViewCellFlags.highlighted = highlighted;
+  [self setNeedsDisplay];
+}
+
 - (BOOL)isSelected
 {
 	return _tableViewCellFlags.selected;

@@ -61,6 +61,13 @@ typedef enum {
 // the following is optional for row reordering
 - (TUIFastIndexPath *)tableView:(TUITableView *)tableView targetIndexPathForMoveFromRowAtIndexPath:(TUIFastIndexPath *)fromPath toProposedIndexPath:(TUIFastIndexPath *)proposedPath;
 
+// optional for dragging out of the tableview (both are required for dragging out to be supported)
+- (BOOL)tableView:(TUITableView *)tableView shouldAllowDraggingOutAtIndexPath:(TUIFastIndexPath *)indexPath;
+- (void)tableView:(TUITableView *)tableView 
+dragOutAtIndexPath:(TUIFastIndexPath *)indexPath 
+            event:(NSEvent *)event
+           offset:(CGPoint)offset;
+
 @end
 
 @interface TUITableView : TUIScrollView

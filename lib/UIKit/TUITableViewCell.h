@@ -46,7 +46,7 @@ typedef enum {
 @property (weak, nonatomic, readonly) TUITableView *tableView;
 @property (strong, nonatomic, readonly) TUIFastIndexPath *indexPath;
 
-@property (nonatomic, readonly, getter=isHighlighted) BOOL highlighted;
+@property (nonatomic, readwrite, getter=isHighlighted) BOOL highlighted;
 @property (nonatomic, assign, getter=isSelected) BOOL selected;
 
 - (void)setSelected:(BOOL)s animated:(BOOL)animated; // called by table view (don't call directly). subclasses can override
