@@ -270,9 +270,12 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
     if([self.attributedString length] > range.location + range.length) 
     {
       // should have an ellipsis
-      NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithAttributedString:[attributedString attributedSubstringFromRange:NSMakeRange(range.location, range.length - 3)]];
+      float l = range.length - 3;
+      if(l < 0)
+        l = 0;
+      NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithAttributedString:[attributedString attributedSubstringFromRange:NSMakeRange(range.location, l)]];
       NSRange r;
-      NSDictionary *attrs = [attributedString attributesAtIndex:range.location + range.length - 1 effectiveRange:&r];
+      NSDictionary *attrs = [attributedString attributesAtIndex:l effectiveRange:&r];
       NSAttributedString *ellipsis = [[NSAttributedString alloc] initWithString:@"…" attributes:attrs];
       [string appendAttributedString:ellipsis];
       CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)string);
