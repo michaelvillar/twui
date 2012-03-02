@@ -266,7 +266,26 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 		if(shadowColor)
 			CGContextSetShadowWithColor(context, shadowOffset, shadowBlur, shadowColor.CGColor);
 
-		CTFrameDraw(f, context); // draw actual text
+    CFRange range = CTFrameGetVisibleStringRange(f);
+    if([self.attributedString length] > range.location + range.length) 
+    {
+      // should have an ellipsis
+      NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithAttributedString:[attributedString attributedSubstringFromRange:NSMakeRange(range.location, range.length - 3)]];
+      NSRange r;
+      NSDictionary *attrs = [attributedString attributesAtIndex:range.location + range.length - 1 effectiveRange:&r];
+      NSAttributedString *ellipsis = [[NSAttributedString alloc] initWithString:@"…" attributes:attrs];
+      [string appendAttributedString:ellipsis];
+      CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)string);
+      CGPathRef path = CGPathCreateMutable();
+      CGPathAddRect((CGMutablePathRef)path, NULL, frame);
+      CTFrameRef frameRef = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
+      CTFrameDraw(frameRef, context); // draw actual text
+      CFRelease(frameRef);
+      CFRelease(framesetter);
+      CFRelease(path);
+    }
+    else
+      CTFrameDraw(f, context); // draw actual text
 				
 		CGContextRestoreGState(context);
 	}
