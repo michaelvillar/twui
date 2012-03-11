@@ -20,6 +20,7 @@
 #import "TUIScrollView.h"
 
 @interface TUIScrollKnob ()
+- (void)_hideKnob;
 - (void)_updateKnob;
 - (void)_updateKnobColor:(CGFloat)duration;
 @end
@@ -40,10 +41,31 @@
 		[self addSubview:knob];
 		[self _updateKnob];
 		[self _updateKnobColor:0.0];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self 
+                                             selector:@selector(preferredScrollerStyleChanged) 
+                                                 name:NSPreferredScrollerStyleDidChangeNotification 
+                                               object:nil];
+
 	}
 	return self;
 }
 
+- (void)preferredScrollerStyleChanged
+{
+  if(_hideKnobTimer) {
+    [_hideKnobTimer invalidate], _hideKnobTimer = nil;
+  }
+  if([NSScroller preferredScrollerStyle] == NSScrollerStyleOverlay)
+  {
+    [self _hideKnob];
+  }
+  else
+  {
+    _knobHidden = NO;
+    [self _updateKnobColor:0.2];
+  }
+}
 
 - (BOOL)isVertical
 {
@@ -80,7 +102,7 @@
 		frame.size.height = MIN(2000, knobLength);
 		frame.size.width = 11;//trackBounds.size.width;
 		frame = ABRectRoundOrigin(CGRectInset(frame, 2, 4));
-    if(!CGRectEqualToRect(frame, knob.frame)) {
+    if(!CGRectEqualToRect(frame, knob.frame) && [NSScroller preferredScrollerStyle] == NSScrollerStyleOverlay) {
       if(_hideKnobTimer) {
         [_hideKnobTimer invalidate], _hideKnobTimer = nil;
       }
