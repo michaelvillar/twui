@@ -194,6 +194,7 @@
  */
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)newSelection replacementRange:(NSRange)replacementRange
 {
+  NSLog(@"set selected range : %@",NSStringFromRange(newSelection));
 	NSRange selectedRange = [self selectedRange];
 	
 	if(replacementRange.location == NSNotFound) {
