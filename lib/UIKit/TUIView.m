@@ -53,6 +53,9 @@ CGRect(^TUIViewCenteredLayout)(TUIView*) = nil;
 
 @interface TUIView ()
 @property (nonatomic, strong) NSMutableArray *subviews;
+- (void)_unregisterWindowFocusNotifications;
+- (void)_registerWindowFocusNotifications;
+- (void)_updateWindowStatus:(NSNotification*)notification;
 @end
 
 @implementation TUIView
@@ -62,6 +65,8 @@ CGRect(^TUIViewCenteredLayout)(TUIView*) = nil;
 @synthesize layout;
 @synthesize toolTip;
 @synthesize toolTipDelay;
+@synthesize shouldDisplayWhenWindowChangesFocus = shouldDisplayWhenWindowChangesFocus_;
+@synthesize windowHasFocus = windowHasFocus_;
 
 - (void)setSubviews:(NSArray *)s
 {
@@ -815,11 +820,19 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 - (void)setNSView:(TUINSView *)n
 {
 	if(n != _nsView) {
+    if(self.nsWindow)
+      [self _unregisterWindowFocusNotifications];
 		[self willMoveToWindow:(TUINSWindow *)[n window]];
 		_nsView = n;
 		[self.subviews makeObjectsPerformSelector:@selector(setNSView:) withObject:n];
 		[self didMoveToWindow];
     [self _registerDraggingTypes];
+    if(self.shouldDisplayWhenWindowChangesFocus) {
+      [self _registerWindowFocusNotifications];
+      [self _updateWindowStatus:nil];
+    }
+    else
+      [self _unregisterWindowFocusNotifications];
 	}
 }
 
@@ -875,6 +888,51 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 - (BOOL)eventInside:(NSEvent *)event
 {
 	return [self pointInside:[self localPointForEvent:event] withEvent:event];
+}
+
+@end
+
+
+@implementation TUIView (NSWindowFocus)
+
+- (void)setShouldDisplayWhenWindowChangesFocus:(BOOL)shouldDisplayWhenWindowChangesFocus
+{
+  if(shouldDisplayWhenWindowChangesFocus_ == shouldDisplayWhenWindowChangesFocus)
+    return;
+  shouldDisplayWhenWindowChangesFocus_ = shouldDisplayWhenWindowChangesFocus;
+  if(self.shouldDisplayWhenWindowChangesFocus)
+    [self _registerWindowFocusNotifications];
+  else
+    [self _unregisterWindowFocusNotifications];
+}
+
+- (void)_unregisterWindowFocusNotifications
+{
+  if(self.nsWindow) {
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeMainNotification object:self.nsWindow];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignMainNotification object:self.nsWindow];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:self.nsWindow];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:self.nsWindow];
+	}
+}
+
+- (void)_registerWindowFocusNotifications
+{
+  if(self.nsWindow) {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_updateWindowStatus:) name:NSWindowDidBecomeMainNotification object:self.nsWindow];	
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_updateWindowStatus:) name:NSWindowDidResignMainNotification object:self.nsWindow];	
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_updateWindowStatus:) name:NSWindowDidBecomeKeyNotification object:self.nsWindow];	
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_updateWindowStatus:) name:NSWindowDidResignKeyNotification object:self.nsWindow];
+  }
+}
+
+- (void)_updateWindowStatus:(NSNotification*)notification
+{
+  BOOL newOne = ((!self.nsWindow) ? YES : ([self.nsWindow isMainWindow] || [self.nsWindow isKeyWindow]));
+	if(newOne == self.windowHasFocus)
+		return;
+	self.windowHasFocus = newOne;
+  [self setNeedsDisplay];
 }
 
 @end

@@ -112,6 +112,9 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
   NSArray *draggingTypes;
 }
 
+@property (assign, nonatomic) BOOL shouldDisplayWhenWindowChangesFocus;
+@property (assign) BOOL windowHasFocus;
+
 /**
  Must be a subclass of CALayer. Default is CALayer. Subclasses may override.
  @returns the class of the layer to be allocated as the view backing layer.
@@ -434,6 +437,7 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
 - (void)viewWillDisplayLayer:(TUIView *)v;
 
 @end
+
 
 #import "TUIView+Private.h"
 #import "TUIView+Event.h"
