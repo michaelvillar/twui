@@ -226,6 +226,11 @@
 	[[self _textEditor] insertText:@"\n"];
 }
 
+- (void)insertNewlineIgnoringFieldEditor:(id)sender
+{
+	[[self _textEditor] insertText:@"\n"];
+}
+
 - (void)deleteBackward:(id)sender
 {
     // Find the range to delete, handling an empty selection and the input point being at 0
