@@ -29,10 +29,12 @@ NSBezierPath* AB_NSBezierPathRoundedFromRects(CGRect rects[], CFIndex rectCount)
   CGRect rect;
   float r = 5;
   float r2;
+  NSLog(@"--");
   
   // right edge
   for(CFIndex i = 0; i < rectCount; ++i) {
     rect = CGRectIntegral(rects[i]);
+    NSLog(@"%@",NSStringFromRect(rect));
     
     r2 = r;
     if(i == 0) {
@@ -60,7 +62,7 @@ NSBezierPath* AB_NSBezierPathRoundedFromRects(CGRect rects[], CFIndex rectCount)
       [path lineToPoint:lineToPoint];
     }
     
-    if(NSMaxX(rect) <= NSMinX(oldRect) + r * 2)
+    if(NSMaxX(rect) <= NSMinX(oldRect) + r)
     {
       [path lineToPoint:CGPointMake(NSMaxX(rect) - r, NSMaxY(rect))];
       r2 = r;
@@ -107,7 +109,7 @@ NSBezierPath* AB_NSBezierPathRoundedFromRects(CGRect rects[], CFIndex rectCount)
       [path lineToPoint:lineToPoint];
     }
     
-    if(NSMinX(rect) >= NSMaxX(oldRect) + r * 2)
+    if(NSMinX(rect) >= NSMaxX(oldRect) - r)
     {
       [path lineToPoint:CGPointMake(NSMinX(rect) + r, NSMinY(rect))];
       r2 = r;
