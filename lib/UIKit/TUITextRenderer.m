@@ -21,6 +21,117 @@
 #import "TUIKit.h"
 #import "CoreText+Additions.h"
 
+NSBezierPath* AB_NSBezierPathRoundedFromRects(CGRect rects[], CFIndex rectCount);
+NSBezierPath* AB_NSBezierPathRoundedFromRects(CGRect rects[], CFIndex rectCount)
+{
+  NSBezierPath *path = [NSBezierPath bezierPath];
+  CGRect oldRect = NSMakeRect(0, 0, 0, 0);
+  CGRect rect;
+  float r = 5;
+  float r2;
+  
+  // right edge
+  for(CFIndex i = 0; i < rectCount; ++i) {
+    rect = CGRectIntegral(rects[i]);
+    
+    r2 = r;
+    if(i == 0) {
+      [path moveToPoint:CGPointMake(NSMaxX(rect) - r, NSMaxY(rect))];
+    }
+    else {
+      CGPoint toPoint;
+      CGPoint lineToPoint;
+      float d = fabs(NSMaxX(rect) - NSMaxX(oldRect)) / 2;
+      r2 = (d > r ? r : d);
+      if(NSMaxX(rect) > NSMaxX(oldRect))
+      {
+        toPoint = CGPointMake(NSMaxX(oldRect) + r, NSMinY(oldRect));
+        lineToPoint = CGPointMake(NSMaxX(rect) - r, NSMaxY(rect));
+      }
+      else
+      {
+        toPoint = CGPointMake(NSMaxX(oldRect) - r, NSMinY(oldRect));
+        lineToPoint = CGPointMake(NSMaxX(rect) + r, NSMaxY(rect));
+      }
+      [path appendBezierPathWithArcFromPoint:CGPointMake(NSMaxX(oldRect), NSMinY(oldRect)) 
+                                     toPoint:toPoint 
+                                      radius:r2];   
+      
+      [path lineToPoint:lineToPoint];
+    }
+    
+    if(NSMaxX(rect) <= NSMinX(oldRect) + r * 2)
+    {
+      [path lineToPoint:CGPointMake(NSMaxX(rect) - r, NSMaxY(rect))];
+      r2 = r;
+    }
+    [path appendBezierPathWithArcFromPoint:CGPointMake(NSMaxX(rect), NSMaxY(rect)) 
+                                   toPoint:CGPointMake(NSMaxX(rect), NSMaxY(rect) - r) 
+                                    radius:r2];
+    [path lineToPoint:CGPointMake(NSMaxX(rect), NSMinY(rect) + r)];
+    
+    if(i == rectCount - 1)
+    {
+      [path appendBezierPathWithArcFromPoint:CGPointMake(NSMaxX(rect), NSMinY(rect)) 
+                                     toPoint:CGPointMake(NSMaxX(rect) - r, NSMinY(rect)) 
+                                      radius:r];
+    }
+    
+    oldRect = rect;
+  }
+  
+  // left edge
+  for(CFIndex i = rectCount - 1; i >= 0; --i) {
+    rect = CGRectIntegral(rects[i]);
+    
+    r2 = r;
+    if(i != rectCount - 1)
+    {
+      CGPoint toPoint;
+      CGPoint lineToPoint;
+      float d = fabs(NSMinX(rect) - NSMinX(oldRect)) / 2;
+      r2 = (d > r ? r : d);
+      if(NSMinX(rect) > NSMinX(oldRect))
+      {
+        toPoint = CGPointMake(NSMinX(oldRect) + r, NSMaxY(oldRect));
+        lineToPoint = CGPointMake(NSMinX(rect) - r, NSMinY(rect));
+      }
+      else
+      {
+        toPoint = CGPointMake(NSMinX(oldRect) - r, NSMaxY(oldRect));
+        lineToPoint = CGPointMake(NSMinX(rect) + r, NSMinY(rect));
+      }
+      [path appendBezierPathWithArcFromPoint:CGPointMake(NSMinX(oldRect), NSMaxY(oldRect)) 
+                                     toPoint:toPoint 
+                                      radius:r2];
+      [path lineToPoint:lineToPoint];
+    }
+    
+    if(NSMinX(rect) >= NSMaxX(oldRect) + r * 2)
+    {
+      [path lineToPoint:CGPointMake(NSMinX(rect) + r, NSMinY(rect))];
+      r2 = r;
+    }
+    [path appendBezierPathWithArcFromPoint:CGPointMake(NSMinX(rect), NSMinY(rect)) 
+                                   toPoint:CGPointMake(NSMinX(rect), NSMinY(rect) + r) 
+                                    radius:r2];
+    [path lineToPoint:CGPointMake(NSMinX(rect), NSMaxY(rect) - r)];
+    
+    if(i == 0)
+    {
+      [path appendBezierPathWithArcFromPoint:CGPointMake(NSMinX(rect), NSMaxY(rect)) 
+                                     toPoint:CGPointMake(NSMinX(rect) + r, NSMaxY(rect)) 
+                                      radius:r];
+    }
+    
+    oldRect = rect;
+  }
+  
+  [path closePath];
+    
+  return path;
+}
+
 NSString *TUITextRendererDidBecomeFirstResponder = @"TUITextRendererDidBecomeFirstResponder";
 NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFirstResponder";
 
@@ -249,15 +360,11 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 			CFIndex rectCount = 100;
 			CGRect rects[rectCount];
 			AB_CTFrameGetRectsForRange([self.attributedString string],f, selectedRange, rects, &rectCount);
+      NSBezierPath *path = AB_NSBezierPathRoundedFromRects(rects, rectCount);
 			if(_flags.drawMaskDragSelection) {
-				CGContextClipToRects(context, rects, rectCount);
+        [path addClip];
 			} else {
-				for(CFIndex i = 0; i < rectCount; ++i) {
-					CGRect r = rects[i];
-					r = CGRectIntegral(r);
-					if(r.size.width > 1)
-						CGContextFillRect(context, r);
-				}
+				[path fill];
 			}
 		}
 		
