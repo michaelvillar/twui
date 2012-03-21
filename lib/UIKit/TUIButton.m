@@ -164,8 +164,7 @@ static CGRect ButtonRectCenteredInRect(CGRect a, CGRect b)
 	CGRect bounds = self.bounds;
 
 	BOOL key = [self.nsWindow isKeyWindow];
-	BOOL down = self.state == TUIControlStateHighlighted;
-	CGFloat alpha = down?0.7:1.0;
+	CGFloat alpha = 1.0;
 	if(_buttonFlags.dimsInBackground)
 		alpha = key?alpha:0.5;
 	
