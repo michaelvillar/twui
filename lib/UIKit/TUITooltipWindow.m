@@ -17,7 +17,7 @@
 #import "TUITooltipWindow.h"
 #import "TUIKit.h"
 
-#define TOOLTIP_HEIGHT 18
+#define TOOLTIP_HEIGHT 17
 #define SWITCH_DELAY 0.2
 #define FADE_OUT_SPEED 0.07
 
@@ -77,7 +77,7 @@ static BOOL ShowingTooltip = NO;
 
 + (CGRect)_tooltipRect
 {
-	CGFloat width = [CurrentTooltipString ab_size].width + 5;
+	CGFloat width = [CurrentTooltipString ab_size].width + 7;
 	NSPoint p = [NSEvent mouseLocation];
 	NSRect r = NSMakeRect(p.x - width*0.5 + 15, p.y - 37, width, TOOLTIP_HEIGHT);
 	return r;
@@ -137,8 +137,7 @@ static BOOL ShowingTooltip = NO;
 		}
 		
 		CurrentTooltipString = [TUIAttributedString stringWithString:s];
-		CurrentTooltipString.font = [TUIFont fontWithName:@"HelveticaNeue" size:11];
-		CurrentTooltipString.kerning = 0.2;
+		CurrentTooltipString.font = [TUIFont systemFontOfSize:11];
 		[CurrentTooltipString setAlignment:TUITextAlignmentCenter lineBreakMode:TUILineBreakModeClip];
 	} else {
 		if(ShowingTooltip) {
