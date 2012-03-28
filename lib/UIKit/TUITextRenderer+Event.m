@@ -296,7 +296,6 @@ normal:
 {
   [[NSNotificationCenter defaultCenter] postNotificationName:TUITextRendererDidResignFirstResponder 
                                                       object:self];
-	[self resetSelection];
 	return YES;
 }
 
