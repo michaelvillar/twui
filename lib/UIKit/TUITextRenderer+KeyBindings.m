@@ -253,6 +253,46 @@
   [self _scrollToIndex:MAX(_selectionStart, _selectionEnd)];
 }
 
+- (void)moveToBeginningOfParagraph:(id)sender
+{
+  [self moveToBeginningOfLine:sender];
+}
+
+- (void)moveToEndOfParagraph:(id)sender
+{
+  [self moveToEndOfLine:sender];
+}
+
+- (void)moveToBeginningOfParagraphAndModifySelection:(id)sender
+{
+  [self moveToBeginningOfLineAndModifySelection:sender];
+}
+
+- (void)moveToEndOfParagraphAndModifySelection:(id)sender
+{
+  [self moveToEndOfLineAndModifySelection:sender];
+}
+
+- (void)moveToBeginningOfDocument:(id)sender
+{
+  [self moveToBeginningOfLine:sender];
+}
+
+- (void)moveToEndOfDocument:(id)sender
+{
+  [self moveToEndOfLine:sender];
+}
+
+- (void)moveToBeginningOfDocumentAndModifySelection:(id)sender
+{
+  [self moveToBeginningOfLineAndModifySelection:sender];
+}
+
+- (void)moveToEndOfDocumentAndModifySelection:(id)sender
+{
+  [self moveToEndOfLineAndModifySelection:sender];
+}
+
 - (void)insertNewline:(id)sender
 {
 	[[self _textEditor] insertText:@"\n"];
