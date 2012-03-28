@@ -73,15 +73,35 @@
 		cursor = [[TUIView alloc] initWithFrame:CGRectZero];
 		cursor.userInteractionEnabled = NO;
 		cursorColor = cursor.backgroundColor = [TUIColor linkColor];
-		[self addSubview:cursor];
+    if(self.windowHasFocus)
+      [self addSubview:cursor];
 		
 		self.font = [TUIFont fontWithName:@"HelveticaNeue" size:12];
 		self.textColor = [TUIColor blackColor];
 		[self _updateDefaultAttributes];
+    
+    self.shouldDisplayWhenWindowChangesFocus = YES;
+    [self addObserver:self 
+           forKeyPath:@"windowHasFocus" 
+              options:NSKeyValueObservingOptionNew 
+              context:NULL];
 	}
 	return self;
 }
 
+- (void)observeValueForKeyPath:(NSString *)keyPath 
+                      ofObject:(id)object 
+                        change:(NSDictionary *)change 
+                       context:(void *)context
+{
+  if([keyPath isEqualToString:@"windowHasFocus"])
+  {
+    if(self.windowHasFocus)
+      [self addSubview:cursor];
+    else
+      [cursor removeFromSuperview];
+  }
+}
 
 - (id)forwardingTargetForSelector:(SEL)sel
 {
