@@ -94,12 +94,16 @@
   
 	TUITableView *tableView = self.tableView;
   [self.nsWindow makeFirstResponder:tableView];
-	[tableView selectRowAtIndexPath:self.indexPath animated:YES scrollPosition:TUITableViewScrollPositionNone];
+	[tableView selectRowAtIndexPath:self.indexPath 
+                         animated:tableView.animateSelectionChanges 
+                   scrollPosition:TUITableViewScrollPositionNone];
 
 	[super mouseDown:event]; // may make the text renderer first responder, so we want to do the selection before this
 	
 	if(![tableView.delegate respondsToSelector:@selector(tableView:shouldSelectRowAtIndexPath:forEvent:)] || [tableView.delegate tableView:tableView shouldSelectRowAtIndexPath:self.indexPath forEvent:event]){
-		[tableView selectRowAtIndexPath:self.indexPath animated:tableView.animateSelectionChanges scrollPosition:TUITableViewScrollPositionNone];
+		[tableView selectRowAtIndexPath:self.indexPath 
+                           animated:tableView.animateSelectionChanges 
+                     scrollPosition:TUITableViewScrollPositionNone];
 		_tableViewCellFlags.highlighted = 1;
 		[self setNeedsDisplay];
 	}
