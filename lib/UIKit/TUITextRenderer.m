@@ -29,12 +29,10 @@ NSBezierPath* AB_NSBezierPathRoundedFromRects(CGRect rects[], CFIndex rectCount)
   CGRect rect;
   float r = 5;
   float r2;
-  NSLog(@"--");
   
   // right edge
   for(CFIndex i = 0; i < rectCount; ++i) {
     rect = CGRectIntegral(rects[i]);
-    NSLog(@"%@",NSStringFromRect(rect));
     
     r2 = r;
     if(i == 0) {
@@ -255,8 +253,14 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 		first = fr.location;
 		last = lr.location + lr.length;
 	}
+  
+  if(first < 0)
+    first = 0;
+  long len = last - first;
+  if(len < 0)
+    len = 0;
 
-	return CFRangeMake(first, last - first);
+	return CFRangeMake(first, len);
 }
 
 - (NSRange)selectedRange
