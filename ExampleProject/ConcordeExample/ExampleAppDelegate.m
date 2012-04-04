@@ -35,22 +35,33 @@
 	TUINSView *tuiTableViewContainer = [[TUINSView alloc] initWithFrame:b];
 	[tableViewWindow setContentView:tuiTableViewContainer];
 	
-	ExampleView *tableExample = [[ExampleView alloc] initWithFrame:b];
-	tuiTableViewContainer.rootView = tableExample;
-	
-	/** Scroll View */
-	scrollViewWindow = [[NSWindow alloc] initWithContentRect:b styleMask:NSTitledWindowMask | NSClosableWindowMask | NSResizableWindowMask backing:NSBackingStoreBuffered defer:YES];
-	[scrollViewWindow setReleasedWhenClosed:FALSE];
-	[scrollViewWindow setMinSize:NSMakeSize(300, 250)];
-	[scrollViewWindow setFrameTopLeftPoint:[tableViewWindow cascadeTopLeftFromPoint:CGPointMake(tableViewWindow.frame.origin.x, tableViewWindow.frame.origin.y + tableViewWindow.frame.size.height)]];
-	
-	/* TUINSView is the bridge between the standard AppKit NSView-based heirarchy and the TUIView-based heirarchy */
-	TUINSView *tuiScrollViewContainer = [[TUINSView alloc] initWithFrame:b];
-	[scrollViewWindow setContentView:tuiScrollViewContainer];
-	
-	ExampleScrollView *scrollExample = [[ExampleScrollView alloc] initWithFrame:b];
-	tuiScrollViewContainer.rootView = scrollExample;
-	
+	TUIView *view = [[TUIView alloc] initWithFrame:b];
+  view.backgroundColor = [TUIColor colorWithRed:0.8 green:0.8 blue:0.8 alpha:1.0];
+	tuiTableViewContainer.rootView = view;
+  
+  CGRect rect = CGRectMake(10, 10, 400, 100);
+  TUIScrollView* scrollView_ = [[TUIScrollView alloc] initWithFrame:rect];
+  TUITextView* textView_ = [[TUITextView alloc] initWithFrame:CGRectMake(0, 0, 
+                                                            rect.size.width, 
+                                                            150)];
+  textView_.backgroundColor = [TUIColor clearColor];
+  textView_.drawFrame = ^(TUIView * view, CGRect rect) {
+    [[NSColor whiteColor] set];
+    [NSBezierPath fillRect:CGRectMake(0, 0, view.bounds.size.width, view.bounds.size.height)];
+  };
+  textView_.subpixelTextRenderingEnabled = YES;
+  textView_.font = [TUIFont systemFontOfSize:12];
+  textView_.autoresizingMask = TUIViewAutoresizingFlexibleWidth;
+  
+  scrollView_.autoresizingMask = TUIViewAutoresizingFlexibleWidth;
+  scrollView_.horizontalScrollIndicatorVisibility = TUIScrollViewIndicatorVisibleNever;
+  scrollView_.scrollEnabled = YES;
+  scrollView_.clipsToBounds = YES;
+  [scrollView_ setContentSize:textView_.bounds.size];
+  [scrollView_ addSubview:textView_];
+
+  [view addSubview:scrollView_];
+
 	[self showTableViewExampleWindow:nil];
 	
 }

@@ -118,7 +118,7 @@
 
 - (NSInteger)numberOfSectionsInTableView:(TUITableView *)tableView
 {
-	return 8;
+	return 2;
 }
 
 - (NSInteger)tableView:(TUITableView *)table numberOfRowsInSection:(NSInteger)section

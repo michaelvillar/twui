@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C6A98DA14E94B720074D3A3 /* TwUI.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4C6A98D914E94B720074D3A3 /* TwUI.framework */; };
 		5C55D83413A667A0000ED768 /* ExampleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C55D83313A667A0000ED768 /* ExampleView.m */; };
 		5C55D83713A66BD5000ED768 /* ExampleTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C55D83613A66BD5000ED768 /* ExampleTableViewCell.m */; };
 		5C57CF3D13A7E7C00032AC1F /* clock.png in Resources */ = {isa = PBXBuildFile; fileRef = 5C57CF3C13A7E7C00032AC1F /* clock.png */; };
@@ -63,7 +64,21 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		4C6A98D814E94B680074D3A3 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				4C6A98DA14E94B720074D3A3 /* TwUI.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		4C6A98D914E94B720074D3A3 /* TwUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TwUI.framework; path = ../build/Debug/TwUI.framework; sourceTree = "<group>"; };
 		5C55D83213A667A0000ED768 /* ExampleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleView.h; sourceTree = "<group>"; };
 		5C55D83313A667A0000ED768 /* ExampleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleView.m; sourceTree = "<group>"; };
 		5C55D83513A66BD5000ED768 /* ExampleTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleTableViewCell.h; sourceTree = "<group>"; };
@@ -129,6 +144,7 @@
 		5ED56676139DC30300031CDF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4C6A98D914E94B720074D3A3 /* TwUI.framework */,
 				D01D9CE0146F54B300147234 /* TwUI.xcodeproj */,
 				5C782FD613A556A800CF69EF /* QuartzCore.framework */,
 				5C782FCF13A54FFD00CF69EF /* ApplicationServices.framework */,
@@ -204,6 +220,7 @@
 				5ED5666F139DC30300031CDF /* Sources */,
 				5ED56670139DC30300031CDF /* Frameworks */,
 				5ED56671139DC30300031CDF /* Resources */,
+				4C6A98D814E94B680074D3A3 /* CopyFiles */,
 			);
 			buildRules = (
 			);

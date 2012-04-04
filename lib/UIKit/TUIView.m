@@ -53,6 +53,9 @@ CGRect(^TUIViewCenteredLayout)(TUIView*) = nil;
 
 @interface TUIView ()
 @property (nonatomic, strong) NSMutableArray *subviews;
+@end
+
+@interface TUIView (NSWindowFocus)
 - (void)_unregisterWindowFocusNotifications;
 - (void)_registerWindowFocusNotifications;
 - (void)_updateWindowStatus:(NSNotification*)notification;
@@ -332,6 +335,24 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 - (NSTimeInterval)toolTipDelay
 {
 	return toolTipDelay;
+}
+
+- (void)setShouldDisplayWhenWindowChangesFocus:(BOOL)shouldDisplayWhenWindowChangesFocus
+{
+  if(shouldDisplayWhenWindowChangesFocus_ == shouldDisplayWhenWindowChangesFocus)
+    return;
+  shouldDisplayWhenWindowChangesFocus_ = shouldDisplayWhenWindowChangesFocus;
+  if(self.shouldDisplayWhenWindowChangesFocus)
+    [self _registerWindowFocusNotifications];
+  else
+    [self _unregisterWindowFocusNotifications];
+}
+
+
+- (void)setDrawRect:(TUIViewDrawRect)d
+{
+	drawRect = [d copy];
+	[self setNeedsDisplay];
 }
 
 @end
@@ -725,12 +746,6 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 	CGContextFillRect(ctx, self.bounds);
 }
 
-- (void)setDrawRect:(TUIViewDrawRect)d
-{
-	drawRect = [d copy];
-	[self setNeedsDisplay];
-}
-
 - (void)setEverythingNeedsDisplay
 {
 	[self setNeedsDisplay];
@@ -894,17 +909,6 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 
 
 @implementation TUIView (NSWindowFocus)
-
-- (void)setShouldDisplayWhenWindowChangesFocus:(BOOL)shouldDisplayWhenWindowChangesFocus
-{
-  if(shouldDisplayWhenWindowChangesFocus_ == shouldDisplayWhenWindowChangesFocus)
-    return;
-  shouldDisplayWhenWindowChangesFocus_ = shouldDisplayWhenWindowChangesFocus;
-  if(self.shouldDisplayWhenWindowChangesFocus)
-    [self _registerWindowFocusNotifications];
-  else
-    [self _unregisterWindowFocusNotifications];
-}
 
 - (void)_unregisterWindowFocusNotifications
 {
