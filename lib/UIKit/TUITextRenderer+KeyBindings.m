@@ -82,6 +82,9 @@
 	return nil;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
+
 - (void)_scrollToIndex:(long)index
 {
   if(self.view && [self.view.superview isKindOfClass:[TUIScrollView class]])
@@ -95,6 +98,8 @@
       [scrollView scrollRectToVisible:rects[0] animated:YES];
   }
 }
+
+#pragma clang diagnostic pop
 
 - (int)_indexByMovingIndex:(int)index
                         by:(int)incr

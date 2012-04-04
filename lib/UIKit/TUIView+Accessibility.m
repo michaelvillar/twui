@@ -175,6 +175,9 @@
 
 #pragma mark API
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
+
 - (NSString *)accessibilityTraitsToRole
 {
 	if((self.accessibilityTraits & TUIAccessibilityTraitButton) != 0) {
@@ -193,6 +196,8 @@
 	// use this handy function for now--might want to customize this more later on
 	return NSAccessibilityRoleDescriptionForUIElement(self);
 }
+
+#pragma clang diagnostic pop
 
 - (NSArray *)accessibleSubviews
 {

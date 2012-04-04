@@ -229,6 +229,9 @@ normal:
 	return [self rectForRange:[self _selectedRange]];
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
+
 - (CGRect)rectForRange:(CFRange)range {
 	CTFrameRef textFrame = [self ctFrame];
 	CGRect totalRect = CGRectNull;
@@ -251,6 +254,8 @@ normal:
 	
 	return totalRect;
 }
+
+#pragma clang diagnostic pop
 
 - (void)resetSelection
 {
