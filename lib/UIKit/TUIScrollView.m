@@ -839,7 +839,13 @@ static float clampBounce(float x) {
 	} else if(rect.origin.y + rect.size.height > visible.origin.y + visible.size.height) {
 		// scroll up, rect to be flush with top of view
 		[self setContentOffset:CGPointMake(0, -rect.origin.y + visible.size.height - rect.size.height) animated:animated];
-	}
+	} else if(rect.origin.x < visible.origin.x) {
+    // scroll right
+    [self setContentOffset:CGPointMake(-rect.origin.x, 0) animated:animated];
+  } else if(rect.origin.x + rect.size.width > visible.origin.x + visible.size.width) {
+    // scroll right
+    [self setContentOffset:CGPointMake(-rect.origin.x + visible.size.width - rect.size.width, 0) animated:animated];
+  }
 	[self.nsView invalidateHoverForView:self];
 }
 
