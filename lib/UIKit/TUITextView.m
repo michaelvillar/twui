@@ -89,6 +89,11 @@
 	return self;
 }
 
+- (void)dealloc
+{
+  [self removeObserver:self forKeyPath:@"windowHasFocus"];
+}
+
 - (void)observeValueForKeyPath:(NSString *)keyPath 
                       ofObject:(id)object 
                         change:(NSDictionary *)change 
