@@ -37,6 +37,16 @@
   return NSDragOperationNone;
 }
 
+- (NSDragOperation)draggingEntered:(id < NSDraggingInfo >)sender
+{
+  return NSDragOperationNone;
+}
+
+- (void)draggingExited:(id < NSDraggingInfo >)sender
+{
+  
+}
+
 - (BOOL)performDragOperation:(id < NSDraggingInfo >)sender
 {
   return NO;

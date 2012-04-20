@@ -20,15 +20,23 @@
 #import "TUITooltipWindow.h"
 #import <CoreFoundation/CoreFoundation.h>
 
+@interface TUINSView ()
+
+@property (strong, readwrite) TUIView *currentDraggingView;
+
+@end
+
 @implementation TUINSView
 
 @synthesize rootView;
+@synthesize currentDraggingView   = currentDraggingView_;
 
 - (id)initWithFrame:(NSRect)frameRect
 {
 	if((self = [super initWithFrame:frameRect])) {
 		opaque = YES;
     _draggingTypesByViews = [[NSMutableDictionary alloc] init];
+    currentDraggingView_ = nil;
 	}
 	return self;
 }
@@ -428,11 +436,6 @@
   return YES;
 }
 
-- (NSDragOperation)draggingEntered:(id < NSDraggingInfo >)sender 
-{
-	return NSDragOperationNone;
-}
-
 - (TUIView*)viewForDraggingInfo:(id < NSDraggingInfo >)sender 
 {
   TUIView *view = [self viewForLocationInWindow:sender.draggingLocation];
@@ -449,12 +452,38 @@
   return nil;
 }
 
+- (NSDragOperation)draggingEntered:(id < NSDraggingInfo >)sender 
+{
+	return NSDragOperationNone;
+}
+
 - (NSDragOperation)draggingUpdated:(id < NSDraggingInfo >)sender 
 {
   TUIView *view = [self viewForDraggingInfo:sender];
+  if(self.currentDraggingView != view)
+  {
+    [self.currentDraggingView draggingExited:sender];
+    self.currentDraggingView = nil;
+  }
   if(view)
+  {
+    if(self.currentDraggingView != view)
+    {
+      self.currentDraggingView = view;
+      [self.currentDraggingView draggingEntered:sender];
+    }
     return [view draggingUpdated:sender];
+  }
   return NSDragOperationNone;
+}
+
+- (void)draggingExited:(id<NSDraggingInfo>)sender
+{
+  if(self.currentDraggingView)
+  {
+    [self.currentDraggingView draggingExited:sender];
+    self.currentDraggingView = nil;
+  }
 }
 
 - (BOOL)performDragOperation:(id < NSDraggingInfo >)sender

@@ -23,6 +23,8 @@
 - (void)registerForDraggedTypes:(NSArray*)types;
 - (void)_registerDraggingTypes;
 - (NSDragOperation)draggingUpdated:(id < NSDraggingInfo >)sender;
+- (NSDragOperation)draggingEntered:(id < NSDraggingInfo >)sender;
+- (void)draggingExited:(id < NSDraggingInfo >)sender;
 - (BOOL)performDragOperation:(id < NSDraggingInfo >)sender;
 
 - (void)startPasteboardDragging;
