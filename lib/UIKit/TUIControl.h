@@ -58,6 +58,7 @@ typedef NSUInteger TUIControlState;
 @property(nonatomic,readonly) TUIControlState state;
 @property(nonatomic,readonly,getter=isTracking) BOOL tracking;
 @property(nonatomic,assign) BOOL selected;
+@property(nonatomic,assign) BOOL highlightedStateAnimated;
 
 @property (nonatomic, assign) BOOL acceptsFirstMouse;
 

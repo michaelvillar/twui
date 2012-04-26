@@ -20,7 +20,11 @@
 #import "TUIAccessibility.h"
 #import "TUINSWindow.h"
 
+#define kTUIControlHighlightedAnimationDuration 0.2
+
 @implementation TUIControl
+
+@synthesize highlightedStateAnimated  = _highlightedStateAnimated;
 
 - (id)initWithFrame:(CGRect)rect
 {
@@ -29,6 +33,7 @@
 		return nil;
 	}
 	
+  _highlightedStateAnimated = NO;
 	self.accessibilityTraits |= TUIAccessibilityTraitButton;
 	
 	return self;
@@ -127,7 +132,12 @@
 	}
   
 	// needs display
-	[self setNeedsDisplay];
+  if(self.highlightedStateAnimated)
+    [TUIView animateWithDuration:kTUIControlHighlightedAnimationDuration animations:^{
+      [self redraw];
+    }];
+  else
+    [self setNeedsDisplay];
   
   BOOL keepTracking = YES;
   NSEvent * nextEvent = event;
@@ -150,7 +160,12 @@
             [self _stateDidChange];
             
             // needs display
-            [self setNeedsDisplay];
+            if(self.highlightedStateAnimated)
+              [TUIView animateWithDuration:kTUIControlHighlightedAnimationDuration animations:^{
+                [self redraw];
+              }];
+            else
+              [self setNeedsDisplay];
           }
         }
         else
@@ -163,7 +178,12 @@
             [self _stateDidChange];
             
             // needs display
-            [self setNeedsDisplay];
+            if(self.highlightedStateAnimated)
+              [TUIView animateWithDuration:kTUIControlHighlightedAnimationDuration animations:^{
+                [self redraw];
+              }];
+            else
+              [self setNeedsDisplay];
           }
         }
         break;
@@ -197,7 +217,12 @@
 	}
 	
 	// needs display
-	[self setNeedsDisplay];
+	if(self.highlightedStateAnimated)
+    [TUIView animateWithDuration:kTUIControlHighlightedAnimationDuration animations:^{
+      [self redraw];
+    }];
+  else
+    [self setNeedsDisplay];
 }
 
 @end
