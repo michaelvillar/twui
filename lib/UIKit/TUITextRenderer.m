@@ -145,6 +145,11 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 @synthesize shadowOffset;
 @synthesize shadowBlur;
 
+- (NSAttributedString*)drawingAttributedString
+{
+  return attributedString;
+}
+
 - (void)_resetFramesetter
 {
 	if(_ct_framesetter) {
@@ -169,7 +174,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 - (void)_buildFramesetter
 {
 	if(!_ct_framesetter) {
-		_ct_framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedString);
+		_ct_framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)[self drawingAttributedString]);
 		_ct_path = CGPathCreateMutable();
 		CGPathAddRect((CGMutablePathRef)_ct_path, NULL, frame);
 		_ct_frame = CTFramesetterCreateFrame(_ct_framesetter, CFRangeMake(0, 0), _ct_path, NULL);
@@ -288,13 +293,13 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 
 - (void)drawInContext:(CGContextRef)context
 {
-	if(attributedString) {
+	if(self.drawingAttributedString) {
 		CGContextSaveGState(context);
 		
 		CTFrameRef f = [self ctFrame];
 		
 		if(_flags.preDrawBlocksEnabled && !_flags.drawMaskDragSelection) {
-			[self.attributedString enumerateAttribute:TUIAttributedStringPreDrawBlockName inRange:NSMakeRange(0, [self.attributedString length]) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
+			[self.drawingAttributedString enumerateAttribute:TUIAttributedStringPreDrawBlockName inRange:NSMakeRange(0, [self.drawingAttributedString length]) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
 				if(value == NULL) return;
 				
 				CGContextSaveGState(context);
@@ -302,9 +307,9 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 				CFIndex rectCount = 100;
 				CGRect rects[rectCount];
 				CFRange r = {range.location, range.length};
-				AB_CTFrameGetRectsForRangeWithAggregationType([self.attributedString string],f, r, (AB_CTLineRectAggregationType)[[self.attributedString attribute:TUIAttributedStringBackgroundFillStyleName atIndex:range.location effectiveRange:NULL] integerValue], rects, &rectCount);
+				AB_CTFrameGetRectsForRangeWithAggregationType([self.drawingAttributedString string],f, r, (AB_CTLineRectAggregationType)[[self.drawingAttributedString attribute:TUIAttributedStringBackgroundFillStyleName atIndex:range.location effectiveRange:NULL] integerValue], rects, &rectCount);
 				TUIAttributedStringPreDrawBlock block = value;
-				block(self.attributedString, range, rects, rectCount);
+				block(self.drawingAttributedString, range, rects, rectCount);
 				
 				CGContextRestoreGState(context);
 			}];
@@ -313,7 +318,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 		if(_flags.backgroundDrawingEnabled && !_flags.drawMaskDragSelection) {
 			CGContextSaveGState(context);
 			
-			[self.attributedString enumerateAttribute:TUIAttributedStringBackgroundColorAttributeName inRange:NSMakeRange(0, [self.attributedString length]) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
+			[self.drawingAttributedString enumerateAttribute:TUIAttributedStringBackgroundColorAttributeName inRange:NSMakeRange(0, [self.drawingAttributedString length]) options:0 usingBlock:^(id value, NSRange range, BOOL *stop) {
 				if(value == NULL) return;
 				
 				CGColorRef color = (__bridge CGColorRef) value;
@@ -322,7 +327,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 				CFIndex rectCount = 100;
 				CGRect rects[rectCount];
 				CFRange r = {range.location, range.length};
-				AB_CTFrameGetRectsForRangeWithAggregationType([self.attributedString string],f, r, (AB_CTLineRectAggregationType)[[self.attributedString attribute:TUIAttributedStringBackgroundFillStyleName atIndex:range.location effectiveRange:NULL] integerValue], rects, &rectCount);
+				AB_CTFrameGetRectsForRangeWithAggregationType([self.drawingAttributedString string],f, r, (AB_CTLineRectAggregationType)[[self.drawingAttributedString attribute:TUIAttributedStringBackgroundFillStyleName atIndex:range.location effectiveRange:NULL] integerValue], rects, &rectCount);
 				for(CFIndex i = 0; i < rectCount; ++i) {
 					CGRect r = rects[i];
 					r = CGRectInset(r, -2, -1);
@@ -343,7 +348,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 			CFRange r = {_r.location, _r.length};
 			CFIndex nRects = 10;
 			CGRect rects[nRects];
-			AB_CTFrameGetRectsForRange([self.attributedString string],f, r, rects, &nRects);
+			AB_CTFrameGetRectsForRange([self.drawingAttributedString string],f, r, rects, &nRects);
 			for(int i = 0; i < nRects; ++i) {
 				CGRect rect = rects[i];
 				rect = CGRectInset(rect, -2, -1);
@@ -365,7 +370,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 			// draw (or mask) selection
 			CFIndex rectCount = 100;
 			CGRect rects[rectCount];
-			AB_CTFrameGetRectsForRange([self.attributedString string],f, selectedRange, rects, &rectCount);
+			AB_CTFrameGetRectsForRange([self.drawingAttributedString string],f, selectedRange, rects, &rectCount);
       NSBezierPath *path = AB_NSBezierPathRoundedFromRects(rects, rectCount);
 			if(_flags.drawMaskDragSelection) {
         [path addClip];
@@ -380,15 +385,15 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 			CGContextSetShadowWithColor(context, shadowOffset, shadowBlur, shadowColor.CGColor);
 
     CFRange range = CTFrameGetVisibleStringRange(f);
-    if([self.attributedString length] > range.location + range.length) 
+    if([self.drawingAttributedString length] > range.location + range.length) 
     {
       // should have an ellipsis
       float l = range.length - 3;
       if(l < 0)
         l = 0;
-      NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithAttributedString:[attributedString attributedSubstringFromRange:NSMakeRange(range.location, l)]];
+      NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithAttributedString:[self.drawingAttributedString attributedSubstringFromRange:NSMakeRange(range.location, l)]];
       NSRange r;
-      NSDictionary *attrs = [attributedString attributesAtIndex:l effectiveRange:&r];
+      NSDictionary *attrs = [self.drawingAttributedString attributesAtIndex:l effectiveRange:&r];
       NSAttributedString *ellipsis = [[NSAttributedString alloc] initWithString:@"…" attributes:attrs];
       [string appendAttributedString:ellipsis];
       CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)string);

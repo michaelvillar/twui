@@ -75,7 +75,7 @@
 @property (nonatomic, copy) TUIViewDrawRect drawFrame;
 
 - (BOOL)hasText;
-
+- (void)setSecurePlaceholder:(NSString *)securePlaceholder;
 - (BOOL)doCommandBySelector:(SEL)selector;
 
 @end

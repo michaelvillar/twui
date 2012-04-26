@@ -108,6 +108,11 @@
   }
 }
 
+- (void)setSecurePlaceholder:(NSString *)securePlaceholder
+{
+  [renderer setSecurePlaceholder:securePlaceholder];
+}
+
 - (id)forwardingTargetForSelector:(SEL)sel
 {
 	if([renderer respondsToSelector:sel])
@@ -238,10 +243,12 @@ static CAAnimation *ThrobAnimation()
 		
 		BOOL fakeMetrics = ([[renderer backingStore] length] == 0);
 		
+    NSString *placeHolderString = renderer.securePlaceHolder;
 		if(fakeMetrics) {
 			// setup fake stuff - fake character with font
 			TUIAttributedString *fake = [TUIAttributedString stringWithString:@"M"];
 			fake.font = self.font;
+      [renderer setSecurePlaceholder:nil];
 			renderer.attributedString = fake;
 			selection = NSMakeRange(0, 0);
 		}
@@ -253,6 +260,8 @@ static CAAnimation *ThrobAnimation()
 		r.size.height = round(fontBoundingBox.origin.y + fontBoundingBox.size.height);
 		r.origin.y += floor(self.font.leading);
 //		NSLog(@"ascent: %f, descent: %f, leading: %f, cap height: %f, x-height: %f, bounding: %@", self.font.ascender, self.font.descender, self.font.leading, self.font.capHeight, self.font.xHeight, NSStringFromRect(CTFontGetBoundingBox(self.font.ctFont)));
+    
+    [renderer setSecurePlaceholder:placeHolderString];
 		
 		[TUIView setAnimationsEnabled:NO block:^{
 			cursor.frame = r;

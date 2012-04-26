@@ -19,6 +19,7 @@
 
 @interface TUITextRenderer ()
 - (void)_scrollToIndex:(long)index;
+- (void)_resetFramesetter;
 @end
 
 @implementation TUITextEditor
@@ -35,12 +36,47 @@
 		markedRange = NSMakeRange(NSNotFound, 0);
 		inputContext = [[NSTextInputContext alloc] initWithClient:self];
 		inputContext.acceptsGlyphInfo = YES; // fucker
-		
+		securePlaceHolder = nil;
 		self.attributedString = backingStore;
 	}
 	return self;
 }
 
+- (void)setSecurePlaceholder:(NSString *)aSecurePlaceholder
+{
+  if((securePlaceHolder == nil && aSecurePlaceholder == nil) ||
+     (securePlaceHolder && [securePlaceHolder.string isEqualToString:aSecurePlaceholder]))
+    return;
+  if(aSecurePlaceholder)
+  {
+    securePlaceHolder = [[NSAttributedString alloc] initWithString:aSecurePlaceholder 
+                                                        attributes:defaultAttributes];
+    if(!secureBackingStore)
+    {
+      secureBackingStore = [[NSMutableAttributedString alloc] initWithString:@""];
+      [secureBackingStore setAttributes:defaultAttributes range:NSMakeRange(0, [secureBackingStore length])];
+    }
+  }
+  else {
+    securePlaceHolder = nil;
+    secureBackingStore = nil;
+  }
+  [self _resetFramesetter];
+}
+
+- (NSString*)securePlaceHolder
+{
+  if(securePlaceHolder)
+    return securePlaceHolder.string;
+  return nil;
+}
+
+- (NSAttributedString*)drawingAttributedString
+{
+  if(securePlaceHolder)
+    return secureBackingStore;
+  return [super drawingAttributedString];
+}
 
 - (NSTextInputContext *)inputContext
 {
@@ -72,6 +108,17 @@
 
 - (void)_textDidChange
 {
+  if(securePlaceHolder)
+  {
+    int length = backingStore.length;
+    while(secureBackingStore.length != length)
+    {
+      if(secureBackingStore.length > length)
+        [secureBackingStore deleteCharactersInRange:NSMakeRange(0, 1)];
+      else if(secureBackingStore.length < length)
+        [secureBackingStore appendAttributedString:securePlaceHolder];
+    }
+  }
 	[inputContext invalidateCharacterCoordinates];
 	[self reset];
 	[view setNeedsDisplay];
@@ -93,6 +140,20 @@
     [self unmarkText];
 	self.selectedRange = NSMakeRange([aString length], 0);
 	[self _textDidChange];
+}
+
+- (BOOL)respondsToSelector:(SEL)aSelector
+{
+  if(aSelector == @selector(copy:) || aSelector == @selector(cut:))
+    return (securePlaceHolder == nil);
+  return [super respondsToSelector:aSelector];
+}
+
+- (void)copy:(id)sender
+{
+  if(securePlaceHolder)
+    return;
+  [super copy:sender];
 }
 
 - (void)cut:(id)sender
