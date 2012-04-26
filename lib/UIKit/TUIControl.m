@@ -113,7 +113,7 @@
 - (void)mouseDown:(NSEvent *)event
 {
 	[super mouseDown:event];
-	
+  
 	// handle state change
 	[self _stateWillChange];
 	_controlFlags.tracking = 1;
@@ -128,13 +128,62 @@
   
 	// needs display
 	[self setNeedsDisplay];
+  
+  BOOL keepTracking = YES;
+  NSEvent * nextEvent = event;
+  
+  while(keepTracking) 
+  {
+    NSPoint mouseLocation = [self convertPoint:[self.nsView convertPoint:[nextEvent locationInWindow]
+                                                                fromView:nil]
+                                      fromView:nil];
+
+    switch( [nextEvent type] ){
+      case NSLeftMouseDragged:
+        if(CGRectContainsPoint(self.bounds, mouseLocation))
+        {
+          if(_controlFlags.tracking != 1)
+          {
+            // handle state change
+            [self _stateWillChange];
+            _controlFlags.tracking = 1;
+            [self _stateDidChange];
+            
+            // needs display
+            [self setNeedsDisplay];
+          }
+        }
+        else
+        {
+          if(_controlFlags.tracking != 0)
+          {
+            // handle state change
+            [self _stateWillChange];
+            _controlFlags.tracking = 0;
+            [self _stateDidChange];
+            
+            // needs display
+            [self setNeedsDisplay];
+          }
+        }
+        break;
+      case NSLeftMouseUp:
+        [self mouseUp:nextEvent];
+        return;
+        break;
+      default:
+        break;
+    }
+    
+    nextEvent = [self.nsWindow nextEventMatchingMask:NSLeftMouseDraggedMask | NSLeftMouseUpMask];
+  }
 }
 
 - (void)mouseUp:(NSEvent *)event
 {
 	[super mouseUp:event];
-	
-	// handle state change
+
+  // handle state change
 	[self _stateWillChange];
 	_controlFlags.tracking = 0;
 	[self _stateDidChange];
