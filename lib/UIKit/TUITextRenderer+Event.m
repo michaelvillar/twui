@@ -19,6 +19,7 @@
 #import "TUIView+Private.h"
 #import "CoreText+Additions.h"
 #import "TUIKit.h"
+#import "TUITextEditor.h"
 
 @interface TUITextRenderer()
 - (CTFramesetterRef)ctFramesetter;
@@ -299,6 +300,8 @@ normal:
 
 - (BOOL)resignFirstResponder
 {
+  if([self isKindOfClass:[TUITextEditor class]])
+    [self setSelection:NSMakeRange(0, 0)];
   [[NSNotificationCenter defaultCenter] postNotificationName:TUITextRendererDidResignFirstResponder 
                                                       object:self];
 	return YES;
