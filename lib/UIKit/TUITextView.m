@@ -66,8 +66,10 @@
 {
 	if((self = [super initWithFrame:frame])) {
 		self.backgroundColor = [TUIColor clearColor];
+    self.editable = YES;
 		
 		renderer = [[[self textEditorClass] alloc] init];
+    renderer.view = self;
 		self.textRenderers = [NSArray arrayWithObject:renderer];
 		
 		cursor = [[TUIView alloc] initWithFrame:CGRectZero];
@@ -395,7 +397,7 @@ static CAAnimation *ThrobAnimation()
 
 - (BOOL)acceptsFirstResponder
 {
-    return YES;
+  return self.editable;
 }
 
 - (BOOL)doCommandBySelector:(SEL)selector

@@ -16,6 +16,20 @@
 	return (TUITextView *)view;
 }
 
+- (TUIResponder *)initialFirstResponder
+{
+  if(self.acceptsFirstResponder)
+    return super.initialFirstResponder;
+  return nil;
+}
+
+- (BOOL)acceptsFirstResponder
+{
+  if(self._textView)
+    return [self._textView acceptsFirstResponder];
+  return [super acceptsFirstResponder];
+}
+
 - (void)doCommandBySelector:(SEL)selector
 {
 	BOOL consumed = [[self _textView] doCommandBySelector:selector];
