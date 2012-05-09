@@ -54,6 +54,7 @@ typedef enum {
 @property(nonatomic,assign)        TUIEdgeInsets    titleEdgeInsets;
 @property(nonatomic,assign)        TUIEdgeInsets    imageEdgeInsets;
 @property(nonatomic,assign) BOOL dimsInBackground;
+@property(readwrite) BOOL dimsWhenHighlighted;
 
 @property(nonatomic,readonly) TUIButtonType buttonType;
 

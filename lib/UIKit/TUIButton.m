@@ -29,6 +29,7 @@
 @implementation TUIButton
 
 @synthesize popUpMenu;
+@synthesize dimsWhenHighlighted;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -39,6 +40,7 @@
 		_buttonFlags.buttonType = TUIButtonTypeCustom;
 		_buttonFlags.dimsInBackground = 1;
 		_buttonFlags.firstDraw = 1;
+    self.dimsWhenHighlighted = NO;
 	}
 	return self;
 }
@@ -165,6 +167,8 @@ static CGRect ButtonRectCenteredInRect(CGRect a, CGRect b)
 
 	BOOL key = [self.nsWindow isKeyWindow];
 	CGFloat alpha = 1.0;
+  if(self.dimsWhenHighlighted && self.state == TUIControlStateHighlighted)
+    alpha = 0.5;
 	if(_buttonFlags.dimsInBackground)
 		alpha = key?alpha:0.5;
 	
