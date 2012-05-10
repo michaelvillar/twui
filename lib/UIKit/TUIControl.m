@@ -63,7 +63,7 @@
   if(_controlFlags.disabled)        actual |= TUIControlStateDisabled;
   if(_controlFlags.selected)        actual |= TUIControlStateSelected;
 	if(_controlFlags.tracking)        actual |= TUIControlStateHighlighted;
-	if(![self.nsWindow isKeyWindow])  actual |= TUIControlStateNotKey;
+	if(![self.nsWindow isKeyWindow] && !_controlFlags.tracking)  actual |= TUIControlStateNotKey;
 	
 	return actual;
 }
