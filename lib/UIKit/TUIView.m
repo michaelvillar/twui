@@ -838,7 +838,9 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
     if(self.nsWindow)
       [self _unregisterWindowFocusNotifications];
 		[self willMoveToWindow:(TUINSWindow *)[n window]];
+    [self willChangeValueForKey:@"nsView"];
 		_nsView = n;
+    [self didChangeValueForKey:@"nsView"];
 		[self.subviews makeObjectsPerformSelector:@selector(setNSView:) withObject:n];
 		[self didMoveToWindow];
     [self _registerDraggingTypes];
