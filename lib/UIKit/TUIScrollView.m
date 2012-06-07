@@ -1191,4 +1191,14 @@ static float clampBounce(float x) {
 	return NO;
 }
 
+- (TUIScrollKnob*)verticalScrollKnob
+{
+  return _verticalScrollKnob;
+}
+
+- (TUIScrollKnob*)horizontalScrollKnob
+{
+  return _horizontalScrollKnob;
+}
+
 @end
