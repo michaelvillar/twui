@@ -21,19 +21,30 @@
 #import "TUIKit.h"
 #import "CoreText+Additions.h"
 
-NSBezierPath* AB_NSBezierPathRoundedFromRects(CGRect rects[], CFIndex rectCount);
-NSBezierPath* AB_NSBezierPathRoundedFromRects(CGRect rects[], CFIndex rectCount)
+NSBezierPath* AB_NSBezierPathRoundedFromRects(CGRect providedRects[], CFIndex rectCount);
+NSBezierPath* AB_NSBezierPathRoundedFromRects(CGRect providedRects[], CFIndex rectCount)
 {
+  CGRect rects[rectCount];
+  CFIndex newRectCount = 0;
+  CGRect rect;
+  // remove empty rects
+  for(CFIndex i = 0; i < rectCount; ++i) {
+    rect = CGRectIntegral(providedRects[i]);
+    if(rect.size.width > 0 && rect.size.height > 0)
+    {
+      rects[newRectCount++] = rect;
+    }
+  }
+  rectCount = newRectCount;
+  
   NSBezierPath *path = [NSBezierPath bezierPath];
   CGRect oldRect = NSMakeRect(0, 0, 0, 0);
-  CGRect rect;
   float r = 5;
   float r2;
   
   // right edge
   for(CFIndex i = 0; i < rectCount; ++i) {
-    rect = CGRectIntegral(rects[i]);
-    
+    rect = rects[i];
     r2 = r;
     if(i == 0) {
       [path moveToPoint:CGPointMake(NSMaxX(rect) - r, NSMaxY(rect))];
@@ -82,7 +93,7 @@ NSBezierPath* AB_NSBezierPathRoundedFromRects(CGRect rects[], CFIndex rectCount)
   
   // left edge
   for(CFIndex i = rectCount - 1; i >= 0; --i) {
-    rect = CGRectIntegral(rects[i]);
+    rect = rects[i];
     
     r2 = r;
     if(i != rectCount - 1)

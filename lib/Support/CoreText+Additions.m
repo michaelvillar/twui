@@ -194,21 +194,13 @@ void AB_CTFrameGetRectsForRangeWithAggregationType(NSString *string, CTFrameRef 
 	CFIndex startIndex = range.location;
 	CFIndex endIndex = startIndex + range.length;
   
-  BOOL startIndexNextLine = NO;
-//  BOOL endIndexNextLine = NO;
-  BOOL startIndexShouldBeNextLine = NO;
-  if(startIndex > 0 && startIndex <= [string length])
-    startIndexShouldBeNextLine = ([[string substringWithRange:NSMakeRange(startIndex - 1, 1)] isEqualToString:@"\n"]);
-//  BOOL endIndexShouldBeNextLine = NO;
-//  if(endIndex > 0 && endIndex <= [string length])
-//    endIndexShouldBeNextLine = ([[string substringWithRange:NSMakeRange(endIndex - 1, 1)] isEqualToString:@"\n"]);
-	
 	NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
 	CFIndex linesCount = [lines count];
 	CGPoint lineOrigins[linesCount];
 	CTFrameGetLineOrigins(frame, CFRangeMake(0, linesCount), lineOrigins);
 	
-	for(CFIndex i = 0; i < linesCount; ++i) {
+	for(CFIndex i = 0; i < linesCount; ++i)
+  {
 		CTLineRef line = (__bridge CTLineRef)[lines objectAtIndex:i];
 		
 		CGPoint lineOrigin = lineOrigins[i];
@@ -223,56 +215,48 @@ void AB_CTFrameGetRectsForRangeWithAggregationType(NSString *string, CTFrameRef 
 		CFIndex lineEndIndex = lineStartIndex + lineRange.length;
 		BOOL containsStartIndex = RangeContainsIndex(lineRange, startIndex);
 		BOOL containsEndIndex = RangeContainsIndex(lineRange, endIndex);
-    if(containsStartIndex && startIndexShouldBeNextLine) {
-      containsStartIndex = NO;
-      startIndexNextLine = YES;
-    }
-      
-    if(startIndexNextLine) {
-      if(i == linesCount - 1) {
-        line_y -= lineHeight;
-      }
-      else {
-        lineOrigin = lineOrigins[i+1];
-        line_y = lineOrigin.y - descent + bounds.origin.y;
-      }
-      
-      CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x, line_y, 1, lineHeight);
-      rects[rectIndex++] = r;
-      startIndexNextLine = NO;
-      
-      if(startIndex == endIndex) {
-        goto end;
-      }
-    }
-		if(containsStartIndex && containsEndIndex) {
+		if(containsStartIndex && containsEndIndex) 
+    {
 			CGFloat startOffset = CTLineGetOffsetForStringIndex(line, startIndex, NULL);
 			CGFloat endOffset = CTLineGetOffsetForStringIndex(line, endIndex, NULL);
-			CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x + startOffset, line_y, endOffset - startOffset, lineHeight);
-			if(aggregationType == AB_CTLineRectAggregationTypeBlock) {
+      float w = endOffset - startOffset;
+      if(endIndex > 0 && [[string substringWithRange:NSMakeRange(endIndex - 1, 1)] isEqualToString:@"\n"])
+      {
+        w = bounds.size.width - startOffset;
+      }
+			CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x + startOffset, line_y, w, lineHeight);
+			if(aggregationType == AB_CTLineRectAggregationTypeBlock) 
+      {
 				r.size.width = bounds.size.width - startOffset;
 			}
 			
 			if(rectIndex < maxRects)
 				rects[rectIndex++] = r;
 			goto end;
-		} else if(containsStartIndex) {
+		} 
+    else if(containsStartIndex) 
+    {
 			if(startIndex == lineEndIndex)
 				continue;
 			CGFloat startOffset = CTLineGetOffsetForStringIndex(line, startIndex, NULL);
 			CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x + startOffset, line_y, bounds.size.width - startOffset, lineHeight);
 			if(rectIndex < maxRects)
 				rects[rectIndex++] = r;
-		} else if(containsEndIndex) {
+		} 
+    else if(containsEndIndex) 
+    {
 			CGFloat endOffset = CTLineGetOffsetForStringIndex(line, endIndex, NULL);
 			CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x, line_y, endOffset, lineHeight);
-			if(aggregationType == AB_CTLineRectAggregationTypeBlock) {
+			if(aggregationType == AB_CTLineRectAggregationTypeBlock) 
+      {
 				r.size.width = bounds.size.width;
 			}
 			
 			if(rectIndex < maxRects)
 				rects[rectIndex++] = r;
-		} else if(RangeContainsIndex(range, lineRange.location)) {
+		} 
+    else if(RangeContainsIndex(range, lineRange.location)) 
+    {
 			CGRect r = CGRectMake(bounds.origin.x + lineOrigin.x, line_y, bounds.size.width, lineHeight);
 			if(rectIndex < maxRects)
 				rects[rectIndex++] = r;
