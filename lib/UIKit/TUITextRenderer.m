@@ -156,6 +156,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 @synthesize shadowOffset;
 @synthesize shadowBlur;
 @synthesize selectionColor;
+@synthesize shouldRefuseFirstResponder;
 
 - (NSAttributedString*)drawingAttributedString
 {
@@ -244,7 +245,7 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 		first = _selectionEnd;
 		last = _selectionStart;
 	}
-	
+
 	if(_selectionAffinity != TUITextSelectionAffinityCharacter) {
 		NSRange fr = {0,0};
 		NSRange lr = {0,0};

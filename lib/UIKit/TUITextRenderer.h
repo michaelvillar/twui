@@ -75,6 +75,8 @@ typedef enum {
 @property (nonatomic, assign) BOOL backgroundDrawingEnabled; // default = NO
 @property (nonatomic, assign) BOOL preDrawBlocksEnabled; // default = NO
 
+@property (readwrite) BOOL shouldRefuseFirstResponder;
+
 - (NSAttributedString*)drawingAttributedString;
 - (void)draw;
 - (void)drawInContext:(CGContextRef)context;

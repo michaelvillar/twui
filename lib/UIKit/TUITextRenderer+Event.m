@@ -208,7 +208,7 @@ normal:
 		_selectionStart = _selectionEnd;
 		_selectionEnd = x;
 	}
-	
+
 	_selectionAffinity = TUITextSelectionAffinityCharacter; // reset affinity
 	
 	CGRect totalRect = CGRectUnion(previousSelectionRect, [self rectForCurrentSelection]);
@@ -288,7 +288,7 @@ normal:
 
 - (BOOL)acceptsFirstResponder
 {
-	return YES;
+	return !self.shouldRefuseFirstResponder;
 }
 
 - (BOOL)becomeFirstResponder
