@@ -343,7 +343,8 @@ static CAAnimation *ThrobAnimation()
 		}
 	}
 	
-	if(selectedTextCheckingResult == nil) return nil;
+	if(selectedTextCheckingResult == nil) 
+    return [[self.textRenderers objectAtIndex:0] menuForEvent:event];
 		
 	NSMenu *menu = [[NSMenu alloc] initWithTitle:@""];
 	NSArray *guesses = [[NSSpellChecker sharedSpellChecker] guessesForWordRange:selectedTextCheckingResult.range inString:[self text] language:nil inSpellDocumentWithTag:0];
