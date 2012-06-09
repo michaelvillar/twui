@@ -16,6 +16,8 @@
 
 #import "TUIView.h"
 
+#define kTUIControlHighlightedAnimationDuration 0.2
+
 enum {
   TUIControlEventTouchDown           = 1 <<  0,
   TUIControlEventTouchDownRepeat     = 1 <<  1,

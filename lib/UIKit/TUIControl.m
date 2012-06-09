@@ -20,8 +20,6 @@
 #import "TUIAccessibility.h"
 #import "TUINSWindow.h"
 
-#define kTUIControlHighlightedAnimationDuration 0.2
-
 @implementation TUIControl
 
 @synthesize highlightedStateAnimated  = _highlightedStateAnimated;
@@ -138,65 +136,6 @@
     }];
   else
     [self setNeedsDisplay];
-  
-  BOOL keepTracking = YES;
-  NSEvent * nextEvent = event;
-  
-  while(keepTracking) 
-  {
-    NSPoint mouseLocation = [self convertPoint:[self.nsView convertPoint:[nextEvent locationInWindow]
-                                                                fromView:nil]
-                                      fromView:nil];
-
-    switch( [nextEvent type] ){
-      case NSLeftMouseDragged:
-        if(CGRectContainsPoint(self.bounds, mouseLocation))
-        {
-          if(_controlFlags.tracking != 1)
-          {
-            // handle state change
-            [self _stateWillChange];
-            _controlFlags.tracking = 1;
-            [self _stateDidChange];
-            
-            // needs display
-            if(self.highlightedStateAnimated)
-              [TUIView animateWithDuration:kTUIControlHighlightedAnimationDuration animations:^{
-                [self redraw];
-              }];
-            else
-              [self setNeedsDisplay];
-          }
-        }
-        else
-        {
-          if(_controlFlags.tracking != 0)
-          {
-            // handle state change
-            [self _stateWillChange];
-            _controlFlags.tracking = 0;
-            [self _stateDidChange];
-            
-            // needs display
-            if(self.highlightedStateAnimated)
-              [TUIView animateWithDuration:kTUIControlHighlightedAnimationDuration animations:^{
-                [self redraw];
-              }];
-            else
-              [self setNeedsDisplay];
-          }
-        }
-        break;
-      case NSLeftMouseUp:
-        [self mouseUp:nextEvent];
-        return;
-        break;
-      default:
-        break;
-    }
-    
-    nextEvent = [self.nsWindow nextEventMatchingMask:NSLeftMouseDraggedMask | NSLeftMouseUpMask];
-  }
 }
 
 - (void)mouseUp:(NSEvent *)event
