@@ -789,7 +789,10 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 		for(TUIFastIndexPath *i in _visibleItems) {
 			TUITableViewCell *cell = [_visibleItems objectForKey:i];
 			cell.frame = [self rectForRowAtIndexPath:i];
-			cell.layer.zPosition = i.row;
+      if([cell shouldForceZPosition])
+        cell.layer.zPosition = cell.zPosition;
+      else
+        cell.layer.zPosition = i.row;
 			[cell setNeedsLayout];
 		}
 	}
@@ -831,7 +834,10 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 			[self.nsView invalidateHoverForView:cell];
 			
 			cell.frame = [self rectForRowAtIndexPath:i];
-			cell.layer.zPosition = i.row;
+      if([cell shouldForceZPosition])
+        cell.layer.zPosition = cell.zPosition;
+      else
+        cell.layer.zPosition = i.row;
 			
 			[cell setNeedsLayout];
 			[cell prepareForDisplay];

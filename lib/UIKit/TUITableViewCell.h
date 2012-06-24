@@ -51,4 +51,7 @@ typedef enum {
 
 - (void)setSelected:(BOOL)s animated:(BOOL)animated; // called by table view (don't call directly). subclasses can override
 
+- (BOOL)shouldForceZPosition;
+- (int)zPosition;
+
 @end

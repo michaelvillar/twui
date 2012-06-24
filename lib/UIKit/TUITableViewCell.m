@@ -228,4 +228,14 @@
   [self setNeedsDisplay];
 }
 
+- (BOOL)shouldForceZPosition
+{
+  return NO;
+}
+
+- (int)zPosition
+{
+  return 0;
+}
+
 @end
