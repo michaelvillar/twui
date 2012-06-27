@@ -47,7 +47,7 @@
 	_hoverView = nil;
 	_trackingView = nil;
 	_trackingArea = nil;
-	
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)resetCursorRects
@@ -125,17 +125,37 @@
 	CALayer *layer = [self layer];
 	[layer setDelegate:self];
 	[layer addSublayer:rootView.layer];
-	if(Screen_Scale != 1.0) {
-		layer.anchorPoint = CGPointMake(0, 0);
-		layer.transform = CATransform3DMakeScale(Screen_Scale, Screen_Scale, Screen_Scale);
+	
+	if([self window] != nil) {
+		self.layer.contentsScale = [[self window] backingScaleFactor];
 	}
 }
 
 - (void)viewDidMoveToWindow
 {
+  if([self window] != nil) {
+    self.layer.contentsScale = [[self window] backingScaleFactor];
+  }
+  
 	if(self.window != nil && rootView.layer.superlayer != [self layer]) {
 		[[self layer] addSublayer:rootView.layer];
 	}
+  [rootView didMoveToWindow];
+}
+
+- (void)viewWillMoveToWindow:(NSWindow *)newWindow
+{
+  NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+  if(self.window)
+    [nc removeObserver:self name:NSWindowDidChangeScreenNotification object:self.window];
+  [nc addObserver:self selector:@selector(windowDidChangeScreen:)
+             name:NSWindowDidChangeScreenNotification object:newWindow];
+}
+
+- (void)windowDidChangeScreen:(NSNotification*)notification
+{
+  if(self.layer.contentsScale != self.window.screen.backingScaleFactor)
+    self.layer.contentsScale = self.window.screen.backingScaleFactor;
 }
 
 - (TUIView *)viewForLocalPoint:(NSPoint)p
