@@ -123,11 +123,14 @@
 	[self _stateDidChange];
 	
 	// handle touch down
-	if([event clickCount] < 2) {
-		[self sendActionsForControlEvents:TUIControlEventTouchDown];
-	} else {
-		[self sendActionsForControlEvents:TUIControlEventTouchDownRepeat];
-	}
+  if(self.isEnabled)
+  {
+    if([event clickCount] < 2) {
+      [self sendActionsForControlEvents:TUIControlEventTouchDown];
+    } else {
+      [self sendActionsForControlEvents:TUIControlEventTouchDownRepeat];
+    }
+  }
   
 	// needs display
   if(self.highlightedStateAnimated)
@@ -147,13 +150,16 @@
 	_controlFlags.tracking = 0;
 	[self _stateDidChange];
 	
-	if([self eventInside:event]) {
-		if(![self didDrag]) {
-			[self sendActionsForControlEvents:TUIControlEventTouchUpInside];
-		}
-	} else {
-		[self sendActionsForControlEvents:TUIControlEventTouchUpOutside];
-	}
+  if(self.isEnabled)
+  {
+    if([self eventInside:event]) {
+      if(![self didDrag]) {
+        [self sendActionsForControlEvents:TUIControlEventTouchUpInside];
+      }
+    } else {
+      [self sendActionsForControlEvents:TUIControlEventTouchUpOutside];
+    }
+  }
 	
 	// needs display
 	if(self.highlightedStateAnimated)
