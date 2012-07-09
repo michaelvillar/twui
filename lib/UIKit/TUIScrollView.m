@@ -74,6 +74,7 @@ enum {
 		_scrollViewFlags.alwaysBounceVertical = FALSE;
 		_scrollViewFlags.alwaysBounceHorizontal = FALSE;
 		
+    _scrollViewFlags.scrollIndicatorStyle = TUIScrollViewIndicatorVisibleDefault;
 		_scrollViewFlags.verticalScrollIndicatorVisibility = TUIScrollViewIndicatorVisibleDefault;
 		_scrollViewFlags.horizontalScrollIndicatorVisibility = TUIScrollViewIndicatorVisibleDefault;
 		
