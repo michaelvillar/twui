@@ -53,6 +53,8 @@ CGRect(^TUIViewCenteredLayout)(TUIView*) = nil;
 
 @interface TUIView ()
 @property (nonatomic, strong) NSMutableArray *subviews;
+@property (strong, readwrite) NSWindow *nsWindowRegisteredForNotifications;
+@property (strong, readwrite) NSWindow *nsWindowRegisteredForScreenNotifications;
 @end
 
 @interface TUIView (NSWindowFocus)
@@ -64,6 +66,8 @@ CGRect(^TUIViewCenteredLayout)(TUIView*) = nil;
 @implementation TUIView
 
 @synthesize subviews = _subviews;
+@synthesize nsWindowRegisteredForNotifications = _nsWindowRegisteredForNotifications;
+@synthesize nsWindowRegisteredForScreenNotifications = _nsWindowRegisteredForScreenNotifications;
 @synthesize drawRect;
 @synthesize layout;
 @synthesize toolTip;
@@ -114,6 +118,8 @@ CGRect(^TUIViewCenteredLayout)(TUIView*) = nil;
 {
 	if((self = [super init]))
 	{
+    _nsWindowRegisteredForNotifications = nil;
+    _nsWindowRegisteredForScreenNotifications = nil;
 		_viewFlags.clearsContextBeforeDrawing = 1;
 		self.frame = frame;
 		toolTipDelay = 1.5;
@@ -677,12 +683,6 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 }
 
 - (void)willMoveToWindow:(TUINSWindow *)newWindow {
-  NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-  if(self.nsWindow)
-    [nc removeObserver:self name:NSWindowDidChangeScreenNotification object:self.nsWindow];
-  [nc addObserver:self selector:@selector(windowDidChangeScreen:)
-             name:NSWindowDidChangeScreenNotification object:newWindow];
-
 	for(TUIView *subview in self.subviews) {
 		[subview willMoveToWindow:newWindow];
 	}
@@ -869,8 +869,6 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 - (void)setNSView:(TUINSView *)n
 {
 	if(n != _nsView) {
-    if(self.nsWindow)
-      [self _unregisterWindowFocusNotifications];
 		[self willMoveToWindow:(TUINSWindow *)[n window]];
     [self willChangeValueForKey:@"nsView"];
 		_nsView = n;
@@ -878,8 +876,27 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 		[self.subviews makeObjectsPerformSelector:@selector(setNSView:) withObject:n];
 		[self didMoveToWindow];
     [self _registerDraggingTypes];
-    if(self.shouldDisplayWhenWindowChangesFocus) {
-      [self _registerWindowFocusNotifications];
+    if(self.nsWindow != self.nsWindowRegisteredForScreenNotifications && self.nsWindow)
+    {
+      NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+      if(self.nsWindowRegisteredForScreenNotifications)
+        [nc removeObserver:self 
+                      name:NSWindowDidChangeScreenNotification
+                    object:self.nsWindowRegisteredForScreenNotifications];
+      self.nsWindowRegisteredForScreenNotifications = self.nsWindow;
+      [nc addObserver:self
+             selector:@selector(windowDidChangeScreen:)
+                 name:NSWindowDidChangeScreenNotification
+               object:self.nsWindowRegisteredForScreenNotifications];
+ 
+    }
+    if(self.shouldDisplayWhenWindowChangesFocus) 
+    {
+      if(self.nsWindow != self.nsWindowRegisteredForNotifications && self.nsWindow)
+      {
+        [self _unregisterWindowFocusNotifications];
+        [self _registerWindowFocusNotifications];
+      }
       [self _updateWindowStatus:nil];
     }
     else
@@ -948,26 +965,30 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 
 - (void)_unregisterWindowFocusNotifications
 {
-  if(self.nsWindow) {
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeMainNotification object:self.nsWindow];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignMainNotification object:self.nsWindow];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:self.nsWindow];
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:self.nsWindow];
+  if(self.nsWindowRegisteredForNotifications) {
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeMainNotification object:self.nsWindowRegisteredForNotifications];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignMainNotification object:self.nsWindowRegisteredForNotifications];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:self.nsWindowRegisteredForNotifications];
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:self.nsWindowRegisteredForNotifications];
+    self.nsWindowRegisteredForNotifications = nil;
 	}
 }
 
 - (void)_registerWindowFocusNotifications
 {
-  if(self.nsWindow) {
+  if(self.nsWindow && self.nsWindow != self.nsWindowRegisteredForNotifications) {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_updateWindowStatus:) name:NSWindowDidBecomeMainNotification object:self.nsWindow];	
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_updateWindowStatus:) name:NSWindowDidResignMainNotification object:self.nsWindow];	
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_updateWindowStatus:) name:NSWindowDidBecomeKeyNotification object:self.nsWindow];	
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_updateWindowStatus:) name:NSWindowDidResignKeyNotification object:self.nsWindow];
+    self.nsWindowRegisteredForNotifications = self.nsWindow;
   }
 }
 
 - (void)_updateWindowStatus:(NSNotification*)notification
 {
+  if(!self.nsWindow) // could be notifications of nsWindowRegisteredForNotifications
+    return;
   BOOL newOne = ((!self.nsWindow) ? YES : ([self.nsWindow isMainWindow] || [self.nsWindow isKeyWindow]));
 	if(newOne == self.windowHasFocus)
 		return;
