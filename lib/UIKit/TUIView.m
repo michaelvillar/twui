@@ -976,7 +976,7 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 
 - (void)_registerWindowFocusNotifications
 {
-  if(self.nsWindow && self.nsWindow != self.nsWindowRegisteredForNotifications) {
+  if(self.nsWindow) {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_updateWindowStatus:) name:NSWindowDidBecomeMainNotification object:self.nsWindow];	
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_updateWindowStatus:) name:NSWindowDidResignMainNotification object:self.nsWindow];	
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_updateWindowStatus:) name:NSWindowDidBecomeKeyNotification object:self.nsWindow];	
@@ -987,12 +987,12 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 
 - (void)_updateWindowStatus:(NSNotification*)notification
 {
-  if(!self.nsWindow) // could be notifications of nsWindowRegisteredForNotifications
-    return;
   BOOL newOne = ((!self.nsWindow) ? YES : ([self.nsWindow isMainWindow] || [self.nsWindow isKeyWindow]));
 	if(newOne == self.windowHasFocus)
 		return;
 	self.windowHasFocus = newOne;
+  if(!self.nsWindow) // could be notifications of nsWindowRegisteredForNotifications
+    return;
   [self setNeedsDisplay];
 }
 
