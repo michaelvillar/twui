@@ -30,8 +30,14 @@
 }
 @end
 
+@interface TUIImage ()
+@property (strong, readwrite) TUIImage *highDpiImage;
+@end
+
 
 @implementation TUIImage
+
+@synthesize highDpiImage      = _highDpiImage;
 
 + (TUIImage *)_imageWithABImage:(id)abimage
 {
@@ -57,6 +63,19 @@
 		NSData *data = [NSData dataWithContentsOfURL:url];
 		if(data) {
 			image = [self imageWithData:data];
+      
+      // check for hidpi image
+      url = [[[NSBundle mainBundle] resourceURL] URLByAppendingPathComponent:
+             [NSString stringWithFormat:@"%@@2x.%@",
+              name.stringByDeletingPathExtension,
+              name.pathExtension]];
+      if(url) {
+        data = [NSData dataWithContentsOfURL:url];
+        if(data) {
+          image.highDpiImage = [self imageWithData:data];
+        }
+      }
+      
 			if(image) {
 				if(shouldCache) {
 					[cache setObject:image forKey:name];
@@ -82,7 +101,6 @@
 	
 	CGImageRef image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
 	if(!image) {
-		NSLog(@"could not create image at index 0");
 		CFRelease(imageSource);
 		return nil;
 	}
@@ -99,6 +117,7 @@
 	{
 		if(imageRef)
 			_imageRef = CGImageRetain(imageRef);
+    _highDpiImage = nil;
 	}
 	return self;
 }
@@ -204,12 +223,17 @@
 
 - (void)drawInRect:(CGRect)rect blendMode:(CGBlendMode)blendMode alpha:(CGFloat)alpha
 {
-	if(_imageRef) {
+  CGImageRef ref = _imageRef;
+  if([NSScreen mainScreen].backingScaleFactor > 1 && self.highDpiImage)
+  {
+    ref = self.highDpiImage.CGImage;
+  }
+	if(ref) {
 		CGContextRef ctx = TUIGraphicsGetCurrentContext();
 		CGContextSaveGState(ctx);
 		CGContextSetAlpha(ctx, alpha);
 		CGContextSetBlendMode(ctx, blendMode);
-		CGContextDrawImage(ctx, rect, _imageRef);
+		CGContextDrawImage(ctx, rect, ref);
 		CGContextRestoreGState(ctx);
 	}
 }
