@@ -167,6 +167,8 @@ typedef enum {
 - (void)scrollRectToVisible:(CGRect)rect animated:(BOOL)animated;
 - (void)scrollToTopAnimated:(BOOL)animated;
 - (void)scrollToBottomAnimated:(BOOL)animated;
+- (BOOL)isBouncing;
+- (void)stopThrowing;
 
 - (void)beginContinuousScrollForDragAtPoint:(CGPoint)dragLocation animated:(BOOL)animated;
 - (void)endContinuousScrollAnimated:(BOOL)animated;

@@ -566,6 +566,11 @@ static CGPoint PointLerp(CGPoint a, CGPoint b, CGFloat t)
 	return -self.contentSize.height + visible.size.height;
 }
 
+- (BOOL)isBouncing
+{
+  return _bounce.bouncing;
+}
+
 /**
  * @brief Whether the scroll view bounces past the edge of content and back again
  * 
@@ -924,7 +929,6 @@ static float clampBounce(float x) {
 
 - (void)_startThrow
 {
-  
   if(!self._pulling){
     if(fabsf(_lastScroll.dy) < 2.0 && fabsf(_lastScroll.dx) < 2.0){
       return; // don't bother throwing
@@ -1019,7 +1023,7 @@ static float clampBounce(float x) {
 			}
 		}
 		
-		switch(phase) {
+    switch(phase) {
 			case ScrollPhaseNormal: {
 				if(_scrollViewFlags.ignoreNextScrollPhaseNormal_10_7) {
 					_scrollViewFlags.ignoreNextScrollPhaseNormal_10_7 = 0;
@@ -1133,6 +1137,17 @@ static float clampBounce(float x) {
 			}
 		}
 	}
+}
+
+- (void)stopThrowing
+{
+  if(_scrollViewFlags.animationMode == AnimationModeThrow) { // otherwise we may have started a scrollToTop:animated:, don't want to stop that)
+    if(_bounce.bouncing) {
+      // ignore - let the bounce finish (_updateBounce will kill the timer when it's ready)
+    } else {
+      [self _stopTimer];
+    }
+  }
 }
 
 -(void)mouseDown:(NSEvent *)event onSubview:(TUIView *)subview {
