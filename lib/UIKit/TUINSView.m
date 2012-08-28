@@ -134,7 +134,7 @@
 - (void)viewDidMoveToWindow
 {
   if([self window] != nil) {
-    self.layer.contentsScale = [[self window] backingScaleFactor];
+    self.layer.contentsScale = self.window.screen.backingScaleFactor;
   }
   
 	if(self.window != nil && rootView.layer.superlayer != [self layer]) {
@@ -155,7 +155,10 @@
 - (void)windowDidChangeScreen:(NSNotification*)notification
 {
   if(self.layer.contentsScale != self.window.screen.backingScaleFactor)
-    self.layer.contentsScale = self.window.screen.backingScaleFactor;
+  {
+    // to redraw this view and every subviews
+    [self.rootView didMoveToWindow];
+  }
 }
 
 - (TUIView *)viewForLocalPoint:(NSPoint)p
