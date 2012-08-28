@@ -22,6 +22,7 @@
 	@public
 	NSInteger leftCapWidth;
 	NSInteger topCapHeight;
+  float ratio;
 	@private
 	__strong TUIImage *slices[9];
 	struct {
@@ -251,8 +252,17 @@
 - (TUIImage *)stretchableImageWithLeftCapWidth:(NSInteger)leftCapWidth topCapHeight:(NSInteger)topCapHeight
 {
 	TUIStretchableImage *i = (TUIStretchableImage *)[TUIStretchableImage imageWithCGImage:_imageRef];
+  if(self.highDpiImage)
+  {
+    TUIStretchableImage *hi = (TUIStretchableImage *)[TUIStretchableImage imageWithCGImage:self.highDpiImage.CGImage];
+    hi->leftCapWidth = leftCapWidth;
+    hi->topCapHeight = topCapHeight;
+    hi->ratio = 2;
+    i.highDpiImage = hi;
+  }
 	i->leftCapWidth = leftCapWidth;
 	i->topCapHeight = topCapHeight;
+  i->ratio = 1;
 	return i;
 }
 
@@ -293,6 +303,11 @@
 - (NSInteger)topCapHeight
 {
 	return topCapHeight;
+}
+
+- (float)ratio
+{
+  return ratio;
 }
 
 /*
@@ -336,6 +351,12 @@
 
 - (void)drawInRect:(CGRect)rect blendMode:(CGBlendMode)blendMode alpha:(CGFloat)alpha
 {
+  BOOL highDef = ([NSScreen mainScreen].backingScaleFactor > 1 && self.highDpiImage);
+  if(highDef)
+  {
+    [self.highDpiImage drawInRect:rect blendMode:blendMode alpha:alpha];
+    return;
+  }
 	CGSize s = self.size;
 	CGFloat t = topCapHeight;
 	CGFloat l = leftCapWidth;
@@ -358,8 +379,12 @@
 		CGContextSaveGState(ctx);
 		CGContextSetAlpha(ctx, alpha);
 		CGContextSetBlendMode(ctx, blendMode);
-		STRETCH_COORDS(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height, t, l, t, l)
-		#define X(I) CGContextDrawImage(ctx, r[I], slices[I].CGImage);
+		STRETCH_COORDS(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height,
+                   t / self.ratio,
+                   l / self.ratio,
+                   t / self.ratio,
+                   l / self.ratio)
+    #define X(I) CGContextDrawImage(ctx, r[I], slices[I].CGImage);
 		X(0) X(1) X(2)
 		X(3) X(4) X(5)
 		X(6) X(7) X(8)
