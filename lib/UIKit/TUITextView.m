@@ -209,10 +209,47 @@ static CAAnimation *ThrobAnimation()
 	b.origin.y += contentInset.bottom;
 	b.size.width -= contentInset.left + contentInset.right;
 	b.size.height -= contentInset.bottom + contentInset.top;
-	if([self singleLine]) {
-		b.size.width = 2000; // big enough
-	}
 	return b;
+}
+
+- (CGRect)_cursorRect
+{
+ 	NSRange selection = [renderer selectedRange];
+  BOOL fakeMetrics = ([[renderer backingStore] length] == 0);
+  
+  BOOL secure = renderer.isSecure;
+  if(fakeMetrics) {
+    // setup fake stuff - fake character with font
+    TUIAttributedString *fake = [TUIAttributedString stringWithString:@"M"];
+    fake.font = self.font;
+    [renderer setSecure:NO];
+    renderer.attributedString = fake;
+    selection = NSMakeRange(0, 0);
+  }
+  
+  // Ugh. So this seems to be a decent approximation for the height of the cursor. It doesn't always match the native cursor but what ev.
+  CGRect r = CGRectIntegral([renderer firstRectForCharacterRange:ABCFRangeFromNSRange(selection)]);
+  r.size.width = 2.0f;
+  CGRect fontBoundingBox = CTFontGetBoundingBox(self.font.ctFont);
+  r.size.height = round(fontBoundingBox.origin.y + fontBoundingBox.size.height);
+  r.origin.y += floor(self.font.leading);
+  
+  // Sigh. So if the string ends with a return, CTFrameGetLines doesn't consider that a new line. So we have to fudge it.
+  if(selection.location > 0 && [[self.text substringWithRange:NSMakeRange(selection.location - 1, 1)] isEqualToString:@"\n"])
+  {
+    CGRect firstCharacterRect = [renderer firstRectForCharacterRange:CFRangeMake(0, 0)];
+    r.origin.y -= firstCharacterRect.size.height;
+    r.origin.x = firstCharacterRect.origin.x;
+  }
+  
+  [renderer setSecure:secure];
+  
+	if(fakeMetrics) {
+		// restore
+		renderer.attributedString = [renderer backingStore];
+	}
+  
+	return r;
 }
 
 - (BOOL)_isKey // will fix
@@ -228,13 +265,32 @@ static CAAnimation *ThrobAnimation()
 
 - (void)drawRect:(CGRect)rect
 {
+  static const CGFloat singleLineWidth = 20000.0f;
+  
 	if(drawFrame)
 		drawFrame(self, rect);
 	
+  BOOL singleLine = [self singleLine];
 	CGRect textRect = [self textRect];
-	if(!CGRectEqualToRect(textRect, _lastTextRect)) {
-		renderer.frame = textRect;
-		_lastTextRect = textRect;
+  CGRect rendererFrame = textRect;
+  if(singleLine) {
+		rendererFrame.size.width = singleLineWidth;
+	}
+
+  renderer.frame = rendererFrame;
+  
+  // Single-line text views scroll horizontally with the cursor.
+	CGRect cursorFrame = [self _cursorRect];
+	CGFloat offset = 0.0f;
+	if(singleLine)
+  {
+		if(CGRectGetMaxX(cursorFrame) > CGRectGetWidth(textRect))
+    {
+			offset = CGRectGetMinX(cursorFrame) - CGRectGetWidth(textRect);
+			rendererFrame = CGRectMake(-offset, rendererFrame.origin.y, CGRectGetWidth(rendererFrame), CGRectGetHeight(rendererFrame));
+			cursorFrame = CGRectOffset(cursorFrame, -offset - CGRectGetWidth(cursorFrame), 0.0f);
+      renderer.frame = rendererFrame;
+		}
 	}
 	
   BOOL resetAttributedString = NO;
@@ -250,53 +306,17 @@ static CAAnimation *ThrobAnimation()
 	[renderer draw];
   if(resetAttributedString)
   {
-    TUIAttributedString *fake = [TUIAttributedString stringWithString:@""];
-    fake.font = self.font;
-    renderer.attributedString = fake;
+    renderer.attributedString = [renderer backingStore];
   }
 	
 	BOOL key = [self _isKey];
 	NSRange selection = [renderer selectedRange];
 	if(key && selection.length == 0) {
 		cursor.hidden = NO;
-		
-		BOOL fakeMetrics = ([[renderer backingStore] length] == 0);
-		
-    BOOL secure = renderer.isSecure;
-		if(fakeMetrics) {
-			// setup fake stuff - fake character with font
-			TUIAttributedString *fake = [TUIAttributedString stringWithString:@"M"];
-			fake.font = self.font;
-      [renderer setSecure:NO];
-			renderer.attributedString = fake;
-			selection = NSMakeRange(0, 0);
-		}
 
-		// Ugh. So this seems to be a decent approximation for the height of the cursor. It doesn't always match the native cursor but what ev.
-		CGRect r = CGRectIntegral([renderer firstRectForCharacterRange:ABCFRangeFromNSRange(selection)]);
-		r.size.width = 2.0f;
-		CGRect fontBoundingBox = CTFontGetBoundingBox(self.font.ctFont);
-		r.size.height = round(fontBoundingBox.origin.y + fontBoundingBox.size.height);
-		r.origin.y += floor(self.font.leading);
-    
-    // Sigh. So if the string ends with a return, CTFrameGetLines doesn't consider that a new line. So we have to fudge it.
-    if(selection.location > 0 && [[self.text substringWithRange:NSMakeRange(selection.location - 1, 1)] isEqualToString:@"\n"]) 
-    {
-      CGRect firstCharacterRect = [renderer firstRectForCharacterRange:CFRangeMake(0, 0)];
-      r.origin.y -= firstCharacterRect.size.height;
-      r.origin.x = firstCharacterRect.origin.x;
-    }
-    
-    [renderer setSecure:secure];
-		
 		[TUIView setAnimationsEnabled:NO block:^{
-			cursor.frame = r;
+			cursor.frame = cursorFrame;
 		}];
-		
-		if(fakeMetrics) {
-			// restore
-			renderer.attributedString = [renderer backingStore];
-		}
 		
 		[cursor.layer removeAnimationForKey:@"opacity"];
 		[cursor.layer addAnimation:ThrobAnimation() forKey:@"opacity"];
