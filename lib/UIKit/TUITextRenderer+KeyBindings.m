@@ -20,6 +20,8 @@
 #import "TUIScrollView.h"
 #import "CoreText+Additions.h"
 
+static NSAttributedString *killBuffer = nil;
+
 @interface TUITextRenderer ()
 
 - (CTFrameRef)ctFrame;
@@ -367,6 +369,7 @@
   NSRange deleteRange = [self selectedRange];
   if(deleteRange.length == 0)
     deleteRange.length = [TEXT length] - deleteRange.location;
+  killBuffer = [[self _textEditor].backingStore attributedSubstringFromRange:deleteRange];
   [[self _textEditor] deleteCharactersInRange:deleteRange];
   [self _scrollToIndex:MAX(_selectionStart, _selectionEnd)];
 }
@@ -386,6 +389,15 @@
 		[self deleteBackward:nil];
 	}
   [self _scrollToIndex:MIN(_selectionStart, _selectionEnd)];
+}
+
+- (void)yank:(id)sender
+{
+  if(killBuffer)
+  {
+    [[self _textEditor] insertText:killBuffer];
+    [self _scrollToIndex:MIN(_selectionStart, _selectionEnd)];
+  }
 }
 
 @end
