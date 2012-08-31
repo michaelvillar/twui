@@ -38,6 +38,7 @@
 @synthesize editable;
 @synthesize contentInset;
 @synthesize placeholder;
+@synthesize placeholderColor;
 @synthesize spellCheckingEnabled;
 @synthesize lastCheckResults;
 @synthesize selectedTextCheckingResult;
@@ -236,7 +237,23 @@ static CAAnimation *ThrobAnimation()
 		_lastTextRect = textRect;
 	}
 	
+  BOOL resetAttributedString = NO;
+  if(renderer.backingStore.length == 0 && self.placeholder && self.placeholder.length > 0)
+  {
+    TUIAttributedString *fake = [TUIAttributedString stringWithString:self.placeholder];
+    fake.font = self.font;
+    if(self.placeholderColor)
+      fake.color = self.placeholderColor;
+    renderer.attributedString = fake;
+    resetAttributedString = YES;
+  }
 	[renderer draw];
+  if(resetAttributedString)
+  {
+    TUIAttributedString *fake = [TUIAttributedString stringWithString:@""];
+    fake.font = self.font;
+    renderer.attributedString = fake;
+  }
 	
 	BOOL key = [self _isKey];
 	NSRange selection = [renderer selectedRange];

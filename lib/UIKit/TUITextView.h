@@ -30,6 +30,7 @@
 	TUIViewDrawRect drawFrame;
 	
 	NSString *placeholder;
+  TUIColor *placeholderColor;
 	
 	TUIFont *font;
 	TUIColor *textColor;
@@ -61,6 +62,7 @@
 
 @property (nonatomic, copy) NSString *text;
 @property (nonatomic, copy) NSString *placeholder;
+@property (nonatomic, strong) TUIColor *placeholderColor;
 @property (nonatomic, strong) TUIFont *font;
 @property (nonatomic, strong) TUIColor *textColor;
 @property (nonatomic, strong) TUIColor *cursorColor;
