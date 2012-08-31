@@ -342,10 +342,9 @@
 		}
 	}
     
-    [[self _textEditor] deleteCharactersInRange:deleteRange];
+  [[self _textEditor] deleteCharactersInRange:deleteRange];
   [self _scrollToIndex:MAX(_selectionStart, _selectionEnd)];
 }
-
 
 - (void)deleteToBeginningOfLine:(id)sender
 {
@@ -356,6 +355,25 @@
 		[self deleteBackward:nil];
 	}
   [self _scrollToIndex:MIN(_selectionStart, _selectionEnd)];
+}
+
+- (void)deleteToBeginningOfParagraph:(id)sender
+{
+  [self deleteToBeginningOfLine:sender];
+}
+
+- (void)deleteToEndOfLine:(id)sender
+{
+  NSRange deleteRange = [self selectedRange];
+  if(deleteRange.length == 0)
+    deleteRange.length = [TEXT length] - deleteRange.location;
+  [[self _textEditor] deleteCharactersInRange:deleteRange];
+  [self _scrollToIndex:MAX(_selectionStart, _selectionEnd)];
+}
+
+- (void)deleteToEndOfParagraph:(id)sender
+{
+  [self deleteToEndOfLine:sender];
 }
 
 - (void)deleteWordBackward:(id)sender
