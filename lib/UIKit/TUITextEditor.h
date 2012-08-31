@@ -23,8 +23,7 @@
 	NSRange markedRange;
 	NSDictionary *defaultAttributes;
 	NSDictionary *markedAttributes;
-  NSAttributedString *securePlaceHolder;
-  NSMutableAttributedString *secureBackingStore;
+  BOOL _secure;
 }
 
 - (NSTextInputContext *)inputContext;
@@ -40,7 +39,7 @@
 - (void)insertText:(id)aString; // at cursor
 - (void)insertText:(id)aString replacementRange:(NSRange)replacementRange;
 - (void)deleteCharactersInRange:(NSRange)range;
-- (void)setSecurePlaceholder:(NSString*)securePlaceholder;
-- (NSString*)securePlaceHolder;
+- (void)setSecure:(BOOL)secured;
+- (BOOL)isSecure;
 
 @end

@@ -36,45 +36,38 @@
 		markedRange = NSMakeRange(NSNotFound, 0);
 		inputContext = [[NSTextInputContext alloc] initWithClient:self];
 		inputContext.acceptsGlyphInfo = YES; // fucker
-		securePlaceHolder = nil;
+		_secure = NO;
 		self.attributedString = backingStore;
 	}
 	return self;
 }
 
-- (void)setSecurePlaceholder:(NSString *)aSecurePlaceholder
+- (void)setSecure:(BOOL)secured
 {
-  if((securePlaceHolder == nil && aSecurePlaceholder == nil) ||
-     (securePlaceHolder && [securePlaceHolder.string isEqualToString:aSecurePlaceholder]))
+  if(_secure == secured)
     return;
-  if(aSecurePlaceholder)
-  {
-    securePlaceHolder = [[NSAttributedString alloc] initWithString:aSecurePlaceholder 
-                                                        attributes:defaultAttributes];
-    if(!secureBackingStore)
-    {
-      secureBackingStore = [[NSMutableAttributedString alloc] initWithString:@""];
-      [secureBackingStore setAttributes:defaultAttributes range:NSMakeRange(0, [secureBackingStore length])];
-    }
-  }
-  else {
-    securePlaceHolder = nil;
-    secureBackingStore = nil;
-  }
+  _secure = secured;
   [self _resetFramesetter];
 }
 
-- (NSString*)securePlaceHolder
+- (BOOL)isSecure
 {
-  if(securePlaceHolder)
-    return securePlaceHolder.string;
-  return nil;
+  return _secure;
 }
 
 - (NSAttributedString*)drawingAttributedString
 {
-  if(securePlaceHolder)
-    return secureBackingStore;
+  if(_secure)
+  {
+    NSString *placeholder = @"•";
+    long backingStoreLength = backingStore.length;
+    NSMutableString *string = [NSMutableString string];
+    for(int i=0;i<backingStoreLength;i++)
+      [string appendString:placeholder];
+    NSAttributedString *securePlaceHolder = [[NSAttributedString alloc] initWithString:string
+                                                                      attributes:defaultAttributes];
+    return securePlaceHolder;
+  }
   return [super drawingAttributedString];
 }
 
@@ -108,17 +101,6 @@
 
 - (void)_textDidChange
 {
-  if(securePlaceHolder)
-  {
-    int length = backingStore.length;
-    while(secureBackingStore.length != length)
-    {
-      if(secureBackingStore.length > length)
-        [secureBackingStore deleteCharactersInRange:NSMakeRange(0, 1)];
-      else if(secureBackingStore.length < length)
-        [secureBackingStore appendAttributedString:securePlaceHolder];
-    }
-  }
 	[inputContext invalidateCharacterCoordinates];
 	[self reset];
 	[view setNeedsDisplay];
@@ -145,13 +127,13 @@
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
   if(aSelector == @selector(copy:) || aSelector == @selector(cut:))
-    return (securePlaceHolder == nil);
+    return !_secure;
   return [super respondsToSelector:aSelector];
 }
 
 - (void)copy:(id)sender
 {
-  if(securePlaceHolder)
+  if(_secure)
     return;
   [super copy:sender];
 }
