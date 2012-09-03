@@ -350,13 +350,15 @@ static NSAttributedString *killBuffer = nil;
 
 - (void)deleteToBeginningOfLine:(id)sender
 {
-	NSInteger selectionLength = abs((int)(_selectionStart - _selectionEnd));
-	if(selectionLength == 0) {
-		[[self _textEditor] deleteCharactersInRange:NSMakeRange(0, _selectionStart)];
-	} else {
-		[self deleteBackward:nil];
-	}
-  [self _scrollToIndex:MIN(_selectionStart, _selectionEnd)];
+	NSRange deleteRange = [self selectedRange];
+  if(deleteRange.length == 0)
+  {
+    deleteRange.length = deleteRange.location;
+    deleteRange.location = 0;
+  }
+  killBuffer = [[self _textEditor].backingStore attributedSubstringFromRange:deleteRange];
+  [[self _textEditor] deleteCharactersInRange:deleteRange];
+  [self _scrollToIndex:MAX(_selectionStart, _selectionEnd)];
 }
 
 - (void)deleteToBeginningOfParagraph:(id)sender
