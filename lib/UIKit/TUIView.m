@@ -985,6 +985,11 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
   }
 }
 
+- (BOOL)avoidDisplayWhenWindowChangesFocus
+{
+  return NO;
+}
+
 - (void)_updateWindowStatus:(NSNotification*)notification
 {
   BOOL newOne = ((!self.nsWindow) ? YES : ([self.nsWindow isMainWindow] || [self.nsWindow isKeyWindow]));
@@ -992,6 +997,8 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 		return;
 	self.windowHasFocus = newOne;
   if(!self.nsWindow) // could be notifications of nsWindowRegisteredForNotifications
+    return;
+  if(self.avoidDisplayWhenWindowChangesFocus)
     return;
   [self setNeedsDisplay];
 }
