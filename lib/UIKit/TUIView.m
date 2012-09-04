@@ -363,6 +363,15 @@ else CGContextSetRGBFillColor(context, 1, 0, 0, 0.3); CGContextFillRect(context,
 	[self setNeedsDisplay];
 }
 
+- (BOOL)isVisibleInWindow
+{
+  if(!self.nsWindow || !self.superview || !self.nsView)
+    return NO;
+  CGRect inWindowFrame = [self convertRect:self.bounds toView:nil];
+  CGRect contentViewFrame = ((NSView*)(self.nsWindow.contentView)).frame;
+  return CGRectIntersectsRect(inWindowFrame, contentViewFrame);
+}
+
 @end
 
 

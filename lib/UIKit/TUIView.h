@@ -178,6 +178,8 @@ extern CGRect(^TUIViewCenteredLayout)(TUIView*);
  */
 - (BOOL)makeFirstResponder;
 
+- (BOOL)isVisibleInWindow;
+
 @end
 
 @interface TUIView (TUIViewGeometry)
