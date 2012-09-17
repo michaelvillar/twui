@@ -81,4 +81,6 @@ typedef NSUInteger TUIControlState;
 - (void)sendAction:(SEL)action to:(id)target forEvent:(NSEvent *)event;
 - (void)sendActionsForControlEvents:(TUIControlEvents)controlEvents;
 
+- (void)setHighlighted:(BOOL)isHighlighted;
+
 @end

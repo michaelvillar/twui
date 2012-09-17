@@ -53,6 +53,11 @@
 	return _controlFlags.tracking;
 }
 
+- (void)setHighlighted:(BOOL)isHighlighted
+{
+  _controlFlags.tracking = (isHighlighted ? 1 : 0);
+}
+
 - (TUIControlState)state
 {
   // start with the normal state, then OR in implicit state that is based on other properties
