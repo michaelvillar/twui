@@ -109,6 +109,8 @@
     else
       [cursor removeFromSuperview];
   }
+  else
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 }
 
 - (void)setSecure:(BOOL)secured
