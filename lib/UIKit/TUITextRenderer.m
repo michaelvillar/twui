@@ -443,7 +443,9 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 {
 	if(attributedString) {
 		// height needs to be something big but not CGFLOAT_MAX big
-		return [attributedString ab_sizeConstrainedToSize:CGSizeMake(width, 1000000.0f)];
+    CGSize size = [attributedString ab_sizeConstrainedToSize:CGSizeMake(width, 1000000.0f)];
+    size.width = MIN(width, size.width);
+    return size;
 	}
 	return CGSizeZero;
 }
