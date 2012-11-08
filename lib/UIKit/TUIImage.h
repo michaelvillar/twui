@@ -45,6 +45,15 @@
 @property (nonatomic, readonly) NSInteger leftCapWidth;   // default is 0. if non-zero, horiz. stretchable. right cap is calculated as width - leftCapWidth - 1
 @property (nonatomic, readonly) NSInteger topCapHeight;   // default is 0. if non-zero, vert. stretchable. bottom cap is calculated as height - topCapWidth - 1
 
+// Animated GIF
+@property (nonatomic, readonly, getter = isAnimated) BOOL animated;
+@property (nonatomic, readonly) NSUInteger animatedImageCount;
++ (TUIImage *)animatedImageWithData:(NSData *)data;
+- (void)drawImageAtIndex:(NSUInteger)index
+                 atPoint:(CGPoint)point;
+- (void)drawImageAtIndex:(NSUInteger)index
+                 inRect:(CGRect)rect;
+- (CGFloat)delayAtIndex:(NSUInteger)index;
 @end
 
 @interface TUIImage (AppKit)

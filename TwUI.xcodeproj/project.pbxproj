@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4CCBE3F4164C3B28002B5A74 /* MVGIFDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 4CCBE3F2164C3B28002B5A74 /* MVGIFDecoder.h */; };
+		4CCBE3F5164C3B28002B5A74 /* MVGIFDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCBE3F3164C3B28002B5A74 /* MVGIFDecoder.m */; };
+		4CCBE3F7164C3B2D002B5A74 /* MVGIFDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCBE3F3164C3B28002B5A74 /* MVGIFDecoder.m */; };
+		4CCBE3F8164C3B2E002B5A74 /* MVGIFDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CCBE3F3164C3B28002B5A74 /* MVGIFDecoder.m */; };
 		5E6ECEB313BE791600109598 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5EE9839C13BE7650005F430D /* ApplicationServices.framework */; };
 		5E6ECEB413BE791600109598 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB5E31B613BE6F49004B7899 /* QuartzCore.framework */; };
 		5E6ECEB613BE791C00109598 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5EE9839C13BE7650005F430D /* ApplicationServices.framework */; };
@@ -264,6 +268,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4CCBE3F2164C3B28002B5A74 /* MVGIFDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVGIFDecoder.h; sourceTree = "<group>"; };
+		4CCBE3F3164C3B28002B5A74 /* MVGIFDecoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MVGIFDecoder.m; sourceTree = "<group>"; };
 		5EE9839C13BE7650005F430D /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
 		5EE983B713BE7809005F430D /* libtwui.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libtwui.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		8819794213E26E0200AA39EB /* TUIView+Accessibility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TUIView+Accessibility.h"; sourceTree = "<group>"; };
@@ -529,6 +535,8 @@
 				CBB74C3A13BE6E1900C85CB5 /* ABActiveRange.m */,
 				CBB74C3B13BE6E1900C85CB5 /* CoreText+Additions.h */,
 				CBB74C3C13BE6E1900C85CB5 /* CoreText+Additions.m */,
+				4CCBE3F2164C3B28002B5A74 /* MVGIFDecoder.h */,
+				4CCBE3F3164C3B28002B5A74 /* MVGIFDecoder.m */,
 			);
 			name = Support;
 			path = lib/Support;
@@ -711,6 +719,7 @@
 				88CC1F3713E3684700827793 /* TUIButton+Accessibility.h in Headers */,
 				88EFFB5113F417E200CF91A9 /* TUITextViewEditor.h in Headers */,
 				88D25F5513F5D96500CFAAA9 /* TUITableView+Cell.h in Headers */,
+				4CCBE3F4164C3B28002B5A74 /* MVGIFDecoder.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -926,6 +935,7 @@
 				88EFFB5613F417E200CF91A9 /* TUITextViewEditor.m in Sources */,
 				88D25F5A13F5D96500CFAAA9 /* TUITableView+Cell.m in Sources */,
 				887F273113F9969800D75DE6 /* TUITableViewSectionHeader.m in Sources */,
+				4CCBE3F8164C3B2E002B5A74 /* MVGIFDecoder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -987,6 +997,7 @@
 				88EFFB5413F417E200CF91A9 /* TUITextViewEditor.m in Sources */,
 				88D25F5813F5D96500CFAAA9 /* TUITableView+Cell.m in Sources */,
 				887F272F13F9969800D75DE6 /* TUITableViewSectionHeader.m in Sources */,
+				4CCBE3F5164C3B28002B5A74 /* MVGIFDecoder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1057,6 +1068,7 @@
 				88EFFB5513F417E200CF91A9 /* TUITextViewEditor.m in Sources */,
 				88D25F5913F5D96500CFAAA9 /* TUITableView+Cell.m in Sources */,
 				887F273013F9969800D75DE6 /* TUITableViewSectionHeader.m in Sources */,
+				4CCBE3F7164C3B2D002B5A74 /* MVGIFDecoder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

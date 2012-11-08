@@ -16,6 +16,7 @@
 
 #import "TUIImage.h"
 #import "TUIKit.h"
+#import "MVGIFDecoder.h"
 
 @interface TUIStretchableImage : TUIImage
 {
@@ -33,12 +34,22 @@
 
 @interface TUIImage ()
 @property (strong, readwrite) TUIImage *highDpiImage;
+@property (nonatomic, readwrite, getter = isAnimated) BOOL animated;
+@property (nonatomic, readwrite) NSUInteger animatedImageCount;
+@property (nonatomic, readwrite) CGFloat animatedInterval;
+@property (strong, readwrite) NSArray *images;
+@property (strong, readwrite) NSArray *animatedDelays;
 @end
 
 
 @implementation TUIImage
 
-@synthesize highDpiImage      = _highDpiImage;
+@synthesize highDpiImage      = _highDpiImage,
+            animated          = _animated,
+            animatedImageCount = _animatedImageCount,
+            animatedInterval  = _animatedInterval,
+            images            = _images,
+            animatedDelays    = _animatedDelays;
 
 + (TUIImage *)_imageWithABImage:(id)abimage
 {
@@ -282,9 +293,53 @@
 	return nil;
 }
 
+// Animated GIF
+
++ (TUIImage *)animatedImageWithData:(NSData *)data {
+  MVGIFDecoder *gifDecoder = [[MVGIFDecoder alloc] initWithData:data];
+  TUIImage *animatedImage = nil;
+  
+  if(gifDecoder.frameCount <= 1)
+    return [TUIImage imageWithData:data];
+
+  NSMutableArray *images = [NSMutableArray array];
+  for(int i=0;i <gifDecoder.frameCount; i++) {
+    TUIImage *image = [TUIImage imageWithData:[gifDecoder dataFrameAtIndex:i]];
+    if(image) {
+      [images addObject:image];
+      if(!animatedImage) {
+        animatedImage = image;
+      }
+    }
+  }
+  
+  if(images.count <= 1)
+    return [TUIImage imageWithData:data];
+
+  animatedImage.animated = YES;
+  animatedImage.animatedImageCount = gifDecoder.frameCount;
+  animatedImage.images = images;
+  animatedImage.animatedDelays = gifDecoder.delays;
+	return animatedImage;
+}
+
+- (void)drawImageAtIndex:(NSUInteger)index atPoint:(CGPoint)point {
+  [(TUIImage*)[self.images objectAtIndex:index] drawAtPoint:point];
+}
+
+- (void)drawImageAtIndex:(NSUInteger)index inRect:(CGRect)rect {
+  [(TUIImage*)[self.images objectAtIndex:index] drawInRect:rect];
+}
+                                       
+- (CGFloat)delayAtIndex:(NSUInteger)index {
+  if(self.animatedDelays.count == 0)
+    return 0.15;
+  if(index < self.animatedDelays.count)
+    return MAX(0.05,((NSNumber*)([self.animatedDelays objectAtIndex:index])).floatValue / 100);
+  return 0.15;
+}
+
 @end
-
-
 
 
 @implementation TUIStretchableImage
