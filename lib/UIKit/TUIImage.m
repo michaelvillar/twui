@@ -302,16 +302,13 @@
   if(gifDecoder.frameCount <= 1)
     return [TUIImage imageWithData:data];
 
-  BOOL nextOnBackgroundColor;
-  BOOL keepOldImage;
+  NSMutableArray *imagesToDrawBefore = [NSMutableArray array];
   NSMutableArray *images = [NSMutableArray array];
-  TUIImage *oldImage = nil;
   for(int i=0;i <gifDecoder.frameCount; i++) {
     int disposalMethod = ((NSNumber*)([[gifDecoder shouldDispose] objectAtIndex:i])).intValue;
     
     TUIImage *image = [TUIImage imageWithData:[gifDecoder dataFrameAtIndex:i]];
-    if(image && oldImage && (keepOldImage ||
-                             disposalMethod == MVGIFDisposalMethodRestoreToPrevious))
+    if(image && (imagesToDrawBefore.count > 0))
     {
       size_t width = image.size.width;
       size_t height = image.size.height;
@@ -325,7 +322,11 @@
       CGRect r;
       r.origin = CGPointZero;
       r.size = image.size;
-      CGContextDrawImage(ctx, r, oldImage.CGImage);
+
+      for(int j=0;j<imagesToDrawBefore.count;j++) {
+        CGContextDrawImage(ctx, r, ((TUIImage*)[imagesToDrawBefore objectAtIndex:j]).CGImage);
+      }
+      
       CGContextDrawImage(ctx, r, image.CGImage);
       
       CGImageRef cgImage = CGBitmapContextCreateImage(ctx);
@@ -335,22 +336,22 @@
       CGImageRelease(cgImage);
       CGContextRelease(ctx);
     }
+    
     if(image) {
       [images addObject:image];
       if(!animatedImage) {
         animatedImage = image;
       }
+      if (disposalMethod == MVGIFDisposalMethodDoNotDispose)
+         [imagesToDrawBefore addObject:image];
     }
-    
-    keepOldImage = (disposalMethod == MVGIFDisposalMethodDoNotDispose);
-    oldImage = image;
   }
   
   if(images.count <= 1)
     return [TUIImage imageWithData:data];
 
   animatedImage.animated = YES;
-  animatedImage.animatedImageCount = gifDecoder.frameCount;
+  animatedImage.animatedImageCount = images.count;
   animatedImage.images = images;
   animatedImage.animatedDelays = gifDecoder.delays;
 	return animatedImage;

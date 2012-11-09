@@ -224,20 +224,17 @@
 			// We save the delays for easy access.
 			[self.delays addObject:[NSNumber numberWithInt:(buffer[1] | buffer[2] << 8)]];
       
-			if (self.frameHeader == nil)
-			{
-        unsigned char board[8];
-				board[0] = 0x21;
-				board[1] = 0xF9;
-				board[2] = 0x04;
-				
-				for(int i = 3, a = 0; a < 5; i++, a++)
-				{
-					board[i] = buffer[a];
-				}
-        
-				self.frameHeader = [NSMutableData dataWithBytes:board length:8];
-			}
+      unsigned char board[8];
+      board[0] = 0x21;
+      board[1] = 0xF9;
+      board[2] = 0x04;
+      
+      for(int i = 3, a = 0; a < 5; i++, a++)
+      {
+        board[i] = buffer[a];
+      }
+    
+      self.frameHeader = [NSMutableData dataWithBytes:board length:8];
       
 			break;
 		}
