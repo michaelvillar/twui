@@ -397,8 +397,14 @@ NSString *TUITextRendererDidResignFirstResponder = @"TUITextRendererDidResignFir
 		
 		CGContextSetTextMatrix(context, CGAffineTransformIdentity);
 		
-		if(shadowColor)
-			CGContextSetShadowWithColor(context, shadowOffset, shadowBlur, shadowColor.CGColor);
+		if(shadowColor) {
+      CGFloat factor = [NSScreen mainScreen].backingScaleFactor;
+			CGContextSetShadowWithColor(context,
+                                  CGSizeMake(shadowOffset.width * factor,
+                                             shadowOffset.height * factor),
+                                  shadowBlur * factor,
+                                  shadowColor.CGColor);
+    }
 
     CFRange range = CTFrameGetVisibleStringRange(f);
     if([self.drawingAttributedString length] > range.location + range.length) 

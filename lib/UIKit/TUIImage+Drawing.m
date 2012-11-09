@@ -134,7 +134,10 @@
 		CGContextSaveGState(ctx);
 		CGRect r = CGRectMake(0, 0, paddedImage.size.width, paddedImage.size.height);
 		CGContextClipToMask(ctx, r, paddedImage.CGImage); // clip to image
-		CGContextSetShadowWithColor(ctx, offset, radius, color.CGColor);
+    CGFloat factor = [NSScreen mainScreen].backingScaleFactor;
+		CGContextSetShadowWithColor(ctx, 
+                                CGSizeMake(offset.width * factor, offset.height * factor),
+                                radius * factor, color.CGColor);
 		CGContextBeginTransparencyLayer(ctx, NULL);
 		{
 			CGContextClipToMask(ctx, r, [[paddedImage invertedMask] CGImage]); // clip to inverted

@@ -243,9 +243,11 @@ NSParagraphStyle *ABNSParagraphStyleForTextAlignment(TUITextAlignment alignment)
 
 + (NSShadow *)shadowWithRadius:(CGFloat)radius offset:(CGSize)offset color:(TUIColor *)color
 {
+  CGFloat factor = [NSScreen mainScreen].backingScaleFactor;
 	NSShadow *shadow = [[NSShadow alloc] init];
-	[shadow setShadowBlurRadius:radius];
-	[shadow setShadowOffset:offset];
+	[shadow setShadowBlurRadius:radius * factor];
+	[shadow setShadowOffset:CGSizeMake(offset.width * factor,
+                                     offset.height * factor)];
 	[shadow setShadowColor:[color nsColor]];
 	return shadow;
 }
