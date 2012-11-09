@@ -19,8 +19,8 @@
 @property (readwrite) int dataPointer;
 @property (readwrite) int sorted;
 @property (readwrite) int colorS;
-@property (readwrite) int colorC;
 @property (readwrite) int colorF;
+@property (readwrite, strong) NSMutableArray *shouldDispose;
 
 - (void)decode;
 - (bool)getBytes:(long)length;
@@ -45,8 +45,8 @@
             dataPointer       = dataPointer_,
             sorted            = sorted_,
             colorS            = colorS_,
-            colorC            = colorC_,
-            colorF            = colorF_;
+            colorF            = colorF_,
+            shouldDispose     = shouldDispose_;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithData:(NSData*)data
@@ -63,6 +63,7 @@
     framesData_ = [[NSMutableArray alloc] init];
     
     dataPointer_ = 0;
+    shouldDispose_ = [[NSMutableArray alloc] init];;
 
     [self decode];
   }
@@ -105,6 +106,11 @@
 	unsigned char aBuffer[length];
 	[self.buffer getBytes:aBuffer length:length];
 	
+  // colorF (Global Color Table Flag       1 Bit)
+  // Color Resolution                      3 Bits)
+  // sorted (Sort Flag                     1 Bit)
+  // colorS (Size of Global Color Table    3 Bits)
+  
 	if (aBuffer[4] & 0x80)
     self.colorF = 1;
   else
@@ -115,12 +121,15 @@
   else
     self.sorted = 0;
   
-	self.colorC = (aBuffer[4] & 0x07);
-	self.colorS = 2 << self.colorC;
-	
+	self.colorS = (aBuffer[4] & 0x07);
+  
 	if (self.colorF == 1)
   {
-		[self getBytes:(3 * self.colorS)];
+    NSUInteger tableLength = (3 * pow(2, self.colorS + 1));
+		[self getBytes:tableLength];
+    
+    unsigned char tableBuffer[tableLength];
+    [self.buffer getBytes:tableBuffer length:tableLength];
     
     // Deep copy
 		[self.global setData:self.buffer];
@@ -208,6 +217,10 @@
 			unsigned char buffer[5];
 			[self.buffer getBytes:buffer length:5];
 			
+      // Get disposal method
+      int disposalMethod = (buffer[0] >> 2) & 0x07;
+      [self.shouldDispose addObject:[NSNumber numberWithInt:disposalMethod]];
+      
 			// We save the delays for easy access.
 			[self.delays addObject:[NSNumber numberWithInt:(buffer[1] | buffer[2] << 8)]];
       
@@ -240,15 +253,14 @@
 {
 	[self getBytes:9];
   
-  // Deep copy
-	NSMutableData *GIF_screenTmp = [NSMutableData dataWithData:self.buffer];
+	NSMutableData *imageDescriptor = [NSMutableData dataWithData:self.buffer];
 	
 	unsigned char aBuffer[9];
 	[self.buffer getBytes:aBuffer length:9];
 	
 	if (aBuffer[8] & 0x80) self.colorF = 1; else self.colorF = 0;
 	
-	unsigned char GIF_code = self.colorC, GIF_sort = self.sorted;
+	unsigned char GIF_code = self.colorS, GIF_sort = self.sorted;
 	
 	if (self.colorF == 1)
   {
@@ -264,7 +276,7 @@
     }
 	}
 	
-	int GIF_size = (2 << GIF_code);
+	int GIF_size = pow(2, GIF_code + 1);
 	
 	size_t blength = [self.screen length];
 	unsigned char bBuffer[blength];
@@ -279,11 +291,15 @@
 		bBuffer[4] |= 0x08;
 	}
 	
+  // Header
   NSMutableData *GIF_string = [NSMutableData dataWithData:
                                [@"GIF89a" dataUsingEncoding:NSUTF8StringEncoding]];
+  
+  // Logical Screen Descriptor
 	[self.screen setData:[NSData dataWithBytes:bBuffer length:blength]];
   [GIF_string appendData:self.screen];
 	
+  // Global Color Table
 	if (self.colorF == 1)
   {
 		[self getBytes:(3 * GIF_size)];
@@ -294,46 +310,44 @@
 		[GIF_string appendData:self.global];
 	}
 	
-	// Add Graphic Control Extension Frame (for transparancy)
+	// Graphic Control Extension
 	[GIF_string appendData:self.frameHeader];
 	
+  // Image Descriptor
 	char endC = 0x2c;
 	[GIF_string appendBytes:&endC length:sizeof(endC)];
-	
-	size_t clength = [GIF_screenTmp length];
+  size_t clength = [imageDescriptor length];
 	unsigned char cBuffer[clength];
-	[GIF_screenTmp getBytes:cBuffer length:clength];
+	[imageDescriptor getBytes:cBuffer length:clength];
 	
 	cBuffer[8] &= 0x40;
 	
-	[GIF_screenTmp setData:[NSData dataWithBytes:cBuffer length:clength]];
-	
-	[GIF_string appendData: GIF_screenTmp];
+	[imageDescriptor setData:[NSData dataWithBytes:cBuffer length:clength]];
+	[GIF_string appendData:imageDescriptor];
+  
+  // Start of image
 	[self getBytes:1];
 	[GIF_string appendData:self.buffer];
 	
-	while (true)
+  // Length of data
+  while (YES)
   {
-		[self getBytes:1];
-		[GIF_string appendData:self.buffer];
-		
-		unsigned char dBuffer[1];
-		[self.buffer getBytes:dBuffer length:1];
-		
-		long u = (long) dBuffer[0];
+    [self getBytes:1];
+    unsigned char cBuffer[1];
+    [self.buffer getBytes:cBuffer length:1];
+    NSUInteger dataLength = cBuffer[0];
+    [GIF_string appendData:self.buffer];
     
-		if (u != 0x00)
+    if (dataLength > 0)
     {
-			[self getBytes:u];
-			[GIF_string appendData:self.buffer];
+      [self getBytes:dataLength];
+      [GIF_string appendData:self.buffer];
     }
     else
-    {
       break;
-    }
-    
-	}
+  }
 	
+  // GIF file terminator
 	endC = 0x3b;
 	[GIF_string appendBytes:&endC length:sizeof(endC)];
 	

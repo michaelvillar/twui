@@ -302,15 +302,48 @@
   if(gifDecoder.frameCount <= 1)
     return [TUIImage imageWithData:data];
 
+  BOOL nextOnBackgroundColor;
+  BOOL keepOldImage;
   NSMutableArray *images = [NSMutableArray array];
+  TUIImage *oldImage = nil;
   for(int i=0;i <gifDecoder.frameCount; i++) {
+    int disposalMethod = ((NSNumber*)([[gifDecoder shouldDispose] objectAtIndex:i])).intValue;
+    
     TUIImage *image = [TUIImage imageWithData:[gifDecoder dataFrameAtIndex:i]];
+    if(image && oldImage && (keepOldImage ||
+                             disposalMethod == MVGIFDisposalMethodRestoreToPrevious))
+    {
+      size_t width = image.size.width;
+      size_t height = image.size.height;
+      size_t bitsPerComponent = 8;
+      size_t bytesPerRow = 4 * width;
+      CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+      CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host | kCGImageAlphaPremultipliedFirst;
+      CGContextRef ctx = CGBitmapContextCreate(NULL, width, height, bitsPerComponent, bytesPerRow, colorSpace, bitmapInfo);
+      CGColorSpaceRelease(colorSpace);
+      
+      CGRect r;
+      r.origin = CGPointZero;
+      r.size = image.size;
+      CGContextDrawImage(ctx, r, oldImage.CGImage);
+      CGContextDrawImage(ctx, r, image.CGImage);
+      
+      CGImageRef cgImage = CGBitmapContextCreateImage(ctx);
+      
+      image = [TUIImage imageWithCGImage:cgImage];
+      
+      CGImageRelease(cgImage);
+      CGContextRelease(ctx);
+    }
     if(image) {
       [images addObject:image];
       if(!animatedImage) {
         animatedImage = image;
       }
     }
+    
+    keepOldImage = (disposalMethod == MVGIFDisposalMethodDoNotDispose);
+    oldImage = image;
   }
   
   if(images.count <= 1)
