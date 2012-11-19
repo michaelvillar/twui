@@ -64,6 +64,8 @@ NSInteger makeFirstResponderCount = 0;
 
 - (BOOL)tui_makeFirstResponder:(NSResponder *)aResponder
 {
+  if(aResponder == nil)
+    return [self makeFirstResponder:nil];
   if(![aResponder acceptsFirstResponder])
     return NO;
 	++makeFirstResponderCount; // cool if it overflows
