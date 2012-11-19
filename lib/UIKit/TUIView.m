@@ -152,6 +152,11 @@ CGRect(^TUIViewCenteredLayout)(TUIView*) = nil;
 	_layer = l;
 }
 
+- (NSUndoManager*)undoManager
+{
+  return nil;
+}
+
 - (BOOL)makeFirstResponder
 {
 	return [[self nsWindow] tui_makeFirstResponder:self];
