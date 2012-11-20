@@ -890,6 +890,29 @@ static float clampBounce(float x) {
 	return _scrollViewFlags.gestureBegan;
 }
 
+- (void)_updateScrollKnobsFromTouchesEvent:(NSEvent*)event
+{
+  NSUInteger count = [event touchesMatchingPhase:NSTouchPhaseTouching
+                                          inView:self.nsView].count;
+  _verticalScrollKnob.touchesInsideScrollView = count;
+  _horizontalScrollKnob.touchesInsideScrollView = count;
+}
+
+- (void)touchesBeganWithEvent:(NSEvent *)event
+{
+  [self _updateScrollKnobsFromTouchesEvent:event];
+}
+
+- (void)touchesEndedWithEvent:(NSEvent *)event
+{
+  [self _updateScrollKnobsFromTouchesEvent:event];
+}
+
+- (void)touchesCancelledWithEvent:(NSEvent *)event
+{
+  [self _updateScrollKnobsFromTouchesEvent:event];
+}
+
 /*
  
  10.6 throw sequence:

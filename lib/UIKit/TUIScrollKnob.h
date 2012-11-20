@@ -38,6 +38,7 @@
 @property (nonatomic, unsafe_unretained) TUIScrollView * scrollView;
 @property (nonatomic, assign) unsigned int    scrollIndicatorStyle;
 @property (nonatomic, readonly) TUIView     * knob;
+@property (nonatomic, readwrite) int touchesInsideScrollView;
 
 - (void)flash;
 

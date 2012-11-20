@@ -29,11 +29,13 @@
 
 @synthesize scrollView;
 @synthesize knob;
+@synthesize touchesInsideScrollView = touchesInsideScrollView_;
 
 - (id)initWithFrame:(CGRect)frame
 {
 	if((self = [super initWithFrame:frame]))
 	{
+    touchesInsideScrollView_ = 0;
 		knob = [[TUIView alloc] initWithFrame:CGRectMake(0, 0, 12, 12)];
 		knob.layer.cornerRadius = 3.5;
 		knob.userInteractionEnabled = NO;
@@ -73,6 +75,32 @@
 	return b.size.height > b.size.width;
 }
 
+- (void)setTouchesInsideScrollView:(int)touchesInsideScrollView
+{
+  if(touchesInsideScrollView == touchesInsideScrollView_)
+    return;
+  touchesInsideScrollView_ = touchesInsideScrollView;
+  if(self.touchesInsideScrollView >= 2)
+  {
+    if(_hideKnobTimer) {
+      [_hideKnobTimer invalidate], _hideKnobTimer = nil;
+    }
+    _knobHidden = NO;
+    [self _updateKnobColor:0.01];
+  }
+  else
+  {
+    if(!_hideKnobTimer)
+    {
+      _hideKnobTimer = [NSTimer scheduledTimerWithTimeInterval:0.8
+                                                        target:self
+                                                      selector:@selector(_hideKnob)
+                                                      userInfo:nil
+                                                       repeats:NO];
+    }
+  }
+}
+
 #define KNOB_CALCULATIONS(OFFSET, LENGTH, MIN_KNOB_SIZE) \
   float proportion = visible.size.LENGTH / contentSize.LENGTH; \
   float knobLength = trackBounds.size.LENGTH * proportion; \
@@ -108,11 +136,14 @@
         if(_hideKnobTimer) {
           [_hideKnobTimer invalidate], _hideKnobTimer = nil;
         }
-        _hideKnobTimer = [NSTimer scheduledTimerWithTimeInterval:1
-                                                          target:self 
-                                                        selector:@selector(_hideKnob) 
-                                                        userInfo:nil 
-                                                         repeats:NO];
+        if(self.touchesInsideScrollView < 2)
+        {
+          _hideKnobTimer = [NSTimer scheduledTimerWithTimeInterval:0.8
+                                                            target:self 
+                                                          selector:@selector(_hideKnob) 
+                                                          userInfo:nil 
+                                                           repeats:NO];
+        }
         _knobHidden = NO;
         [self _updateKnobColor:0.01];
       }

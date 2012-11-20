@@ -37,6 +37,7 @@
 		opaque = YES;
     _draggingTypesByViews = [[NSMutableDictionary alloc] init];
     currentDraggingView_ = nil;
+    [self setAcceptsTouchEvents:YES];
 	}
 	return self;
 }
@@ -336,6 +337,42 @@
 {
 	[[self viewForEvent:event] scrollWheel:event];
 	[self _updateHoverView:nil withEvent:event]; // don't pop in while scrolling
+}
+
+- (void)touchesBeganWithEvent:(NSEvent *)event
+{
+  if(!deliveringEvent) {
+		deliveringEvent = YES;
+		[[self viewForEvent:event] touchesBeganWithEvent:event];
+		deliveringEvent = NO;
+	}
+}
+
+- (void)touchesMovedWithEvent:(NSEvent *)event
+{
+  if(!deliveringEvent) {
+		deliveringEvent = YES;
+		[[self viewForEvent:event] touchesMovedWithEvent:event];
+		deliveringEvent = NO;
+	}
+}
+
+- (void)touchesCancelledWithEvent:(NSEvent *)event
+{
+  if(!deliveringEvent) {
+		deliveringEvent = YES;
+		[[self viewForEvent:event] touchesCancelledWithEvent:event];
+		deliveringEvent = NO;
+	}
+}
+
+- (void)touchesEndedWithEvent:(NSEvent *)event
+{
+  if(!deliveringEvent) {
+		deliveringEvent = YES;
+		[[self viewForEvent:event] touchesEndedWithEvent:event];
+		deliveringEvent = NO;
+	}
 }
 
 - (void)beginGestureWithEvent:(NSEvent *)event
