@@ -238,36 +238,42 @@
 {
 	_mouseDown = [self localPointForEvent:event];
 	_knobStartFrame = knob.frame;
-	_scrollKnobFlags.active = 1;
-	[self _updateKnobColor:0.08];
+  
+  if(!_knobHidden)
+  {
+    _scrollKnobFlags.active = 1;
+    [self _updateKnobColor:0.08];
 
-	if([knob pointInside:[self convertPoint:_mouseDown toView:knob] withEvent:event]) { // can't use hitTest because userInteractionEnabled is NO
-		// normal drag-knob-scroll
-		_scrollKnobFlags.trackingInsideKnob = 1;
-	} else {
-		// page-scroll
-		_scrollKnobFlags.trackingInsideKnob = 0;
+    if([knob pointInside:[self convertPoint:_mouseDown toView:knob] withEvent:event]) { // can't use hitTest because userInteractionEnabled is NO
+      // normal drag-knob-scroll
+      _scrollKnobFlags.trackingInsideKnob = 1;
+    } else {
+      // page-scroll
+      _scrollKnobFlags.trackingInsideKnob = 0;
 
-		CGRect visible = scrollView.visibleRect;
-		CGPoint contentOffset = scrollView.contentOffset;
+      CGRect visible = scrollView.visibleRect;
+      CGPoint contentOffset = scrollView.contentOffset;
 
-		if([self isVertical]) {
-			if(_mouseDown.y < _knobStartFrame.origin.y) {
-				contentOffset.y += visible.size.height;
-			} else {
-				contentOffset.y -= visible.size.height;
-			}
-		} else {
-			if(_mouseDown.x < _knobStartFrame.origin.x) {
-				contentOffset.x += visible.size.width;
-			} else {
-				contentOffset.x -= visible.size.width;
-			}
-		}
+      if([self isVertical]) {
+        if(_mouseDown.y < _knobStartFrame.origin.y) {
+          contentOffset.y += visible.size.height;
+        } else {
+          contentOffset.y -= visible.size.height;
+        }
+      } else {
+        if(_mouseDown.x < _knobStartFrame.origin.x) {
+          contentOffset.x += visible.size.width;
+        } else {
+          contentOffset.x -= visible.size.width;
+        }
+      }
 
-		[scrollView setContentOffset:contentOffset animated:YES];
-	}
-	
+      [scrollView setContentOffset:contentOffset animated:YES];
+    }
+  }
+  else
+    _scrollKnobFlags.trackingInsideKnob = 0;
+  
 	[super mouseDown:event];
 }
 
