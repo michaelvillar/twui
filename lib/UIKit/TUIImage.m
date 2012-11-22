@@ -296,65 +296,70 @@
 // Animated GIF
 
 + (TUIImage *)animatedImageWithData:(NSData *)data {
-  MVGIFDecoder *gifDecoder = [[MVGIFDecoder alloc] initWithData:data];
-  TUIImage *animatedImage = nil;
-  
-  if(gifDecoder.frameCount <= 1)
-    return [TUIImage imageWithData:data];
-
-  NSMutableArray *imagesToDrawBefore = [NSMutableArray array];
-  NSMutableArray *images = [NSMutableArray array];
-  for(int i=0;i <gifDecoder.frameCount; i++) {
-    int disposalMethod = ((NSNumber*)([[gifDecoder shouldDispose] objectAtIndex:i])).intValue;
+  @try {
+    MVGIFDecoder *gifDecoder = [[MVGIFDecoder alloc] initWithData:data];
+    TUIImage *animatedImage = nil;
     
-    TUIImage *image = [TUIImage imageWithData:[gifDecoder dataFrameAtIndex:i]];
-    if(image && (imagesToDrawBefore.count > 0))
-    {
-      size_t width = image.size.width;
-      size_t height = image.size.height;
-      size_t bitsPerComponent = 8;
-      size_t bytesPerRow = 4 * width;
-      CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-      CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host | kCGImageAlphaPremultipliedFirst;
-      CGContextRef ctx = CGBitmapContextCreate(NULL, width, height, bitsPerComponent, bytesPerRow, colorSpace, bitmapInfo);
-      CGColorSpaceRelease(colorSpace);
+    if(gifDecoder.frameCount <= 1)
+      return [TUIImage imageWithData:data];
+    
+    NSMutableArray *imagesToDrawBefore = [NSMutableArray array];
+    NSMutableArray *images = [NSMutableArray array];
+    for(int i=0;i <gifDecoder.frameCount; i++) {
+      int disposalMethod = ((NSNumber*)([[gifDecoder shouldDispose] objectAtIndex:i])).intValue;
       
-      CGRect r;
-      r.origin = CGPointZero;
-      r.size = image.size;
-
-      for(int j=0;j<imagesToDrawBefore.count;j++) {
-        CGContextDrawImage(ctx, r, ((TUIImage*)[imagesToDrawBefore objectAtIndex:j]).CGImage);
+      TUIImage *image = [TUIImage imageWithData:[gifDecoder dataFrameAtIndex:i]];
+      if(image && (imagesToDrawBefore.count > 0))
+      {
+        size_t width = image.size.width;
+        size_t height = image.size.height;
+        size_t bitsPerComponent = 8;
+        size_t bytesPerRow = 4 * width;
+        CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+        CGBitmapInfo bitmapInfo = kCGBitmapByteOrder32Host | kCGImageAlphaPremultipliedFirst;
+        CGContextRef ctx = CGBitmapContextCreate(NULL, width, height, bitsPerComponent, bytesPerRow, colorSpace, bitmapInfo);
+        CGColorSpaceRelease(colorSpace);
+        
+        CGRect r;
+        r.origin = CGPointZero;
+        r.size = image.size;
+        
+        for(int j=0;j<imagesToDrawBefore.count;j++) {
+          CGContextDrawImage(ctx, r, ((TUIImage*)[imagesToDrawBefore objectAtIndex:j]).CGImage);
+        }
+        
+        CGContextDrawImage(ctx, r, image.CGImage);
+        
+        CGImageRef cgImage = CGBitmapContextCreateImage(ctx);
+        
+        image = [TUIImage imageWithCGImage:cgImage];
+        
+        CGImageRelease(cgImage);
+        CGContextRelease(ctx);
       }
       
-      CGContextDrawImage(ctx, r, image.CGImage);
-      
-      CGImageRef cgImage = CGBitmapContextCreateImage(ctx);
-      
-      image = [TUIImage imageWithCGImage:cgImage];
-      
-      CGImageRelease(cgImage);
-      CGContextRelease(ctx);
+      if(image) {
+        [images addObject:image];
+        if(!animatedImage) {
+          animatedImage = image;
+        }
+        if (disposalMethod == MVGIFDisposalMethodDoNotDispose)
+          [imagesToDrawBefore addObject:image];
+      }
     }
     
-    if(image) {
-      [images addObject:image];
-      if(!animatedImage) {
-        animatedImage = image;
-      }
-      if (disposalMethod == MVGIFDisposalMethodDoNotDispose)
-         [imagesToDrawBefore addObject:image];
-    }
+    if(images.count <= 1)
+      return [TUIImage imageWithData:data];
+    
+    animatedImage.animated = YES;
+    animatedImage.animatedImageCount = images.count;
+    animatedImage.images = images;
+    animatedImage.animatedDelays = gifDecoder.delays;
+    return animatedImage;
   }
-  
-  if(images.count <= 1)
+  @catch (NSException *exception) {
     return [TUIImage imageWithData:data];
-
-  animatedImage.animated = YES;
-  animatedImage.animatedImageCount = images.count;
-  animatedImage.images = images;
-  animatedImage.animatedDelays = gifDecoder.delays;
-	return animatedImage;
+  }
 }
 
 - (void)drawImageAtIndex:(NSUInteger)index atPoint:(CGPoint)point {
