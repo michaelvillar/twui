@@ -30,6 +30,9 @@ extern CGSize AB_CTFrameGetSize(CTFrameRef frame, BOOL shouldAddOneLine);
 extern CGFloat AB_CTFrameGetHeight(CTFrameRef frame);
 extern CFIndex AB_CTFrameGetStringIndexForPosition(CTFrameRef frame, CGPoint p);
 
+extern CFIndex AB_CTFrameGetIndexForBeginningOfLineWithCharIndex(CTFrameRef frame, CFIndex charIndex);
+extern CFIndex AB_CTFrameGetIndexForEndingOfLineWithCharIndex(CTFrameRef frame, CFIndex charIndex);
+
 extern void AB_CTFrameGetIndexForPositionInLine(NSString *string, CTFrameRef frame, CFIndex lineIndex, float xPosition, CFIndex *index);
 extern void AB_CTFrameGetLinePositionOfIndex(NSString *string, CTFrameRef frame, int index, CFIndex *lineIndex, float *xPosition);
 extern void AB_CTFrameGetRectsForRange(NSString *string, CTFrameRef frame, CFRange range, CGRect rects[], CFIndex *rectCount);

@@ -34,44 +34,6 @@ static NSAttributedString *killBuffer = nil;
 
 @implementation NSString (ABTokenizerAdditions)
 
-- (CFIndex)ab_beginningOfLineGivenCursor:(CFIndex)cursor
-{
-  __block CFIndex ret = -1;
-	[self enumerateSubstringsInRange:NSMakeRange(0, [self length])
-                           options:NSStringEnumerationByLines|NSStringEnumerationReverse|NSStringEnumerationSubstringNotRequired
-                        usingBlock:^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop)
-  {
-    CFIndex l = substringRange.location;
-    if(l <= cursor) {
-      ret = l;
-      *stop = YES;
-    }
-  }];
-	if(ret == -1) {
-		ret = 0; // go to beginning
-	}
-	return ret;
-}
-
-- (CFIndex)ab_endOfLineGivenCursor:(CFIndex)cursor
-{
-  __block CFIndex ret = -1;
-	[self enumerateSubstringsInRange:NSMakeRange(0, [self length])
-                           options:NSStringEnumerationByLines|NSStringEnumerationSubstringNotRequired
-                        usingBlock:^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop)
-   {
-     CFIndex l = substringRange.location + substringRange.length;
-     if(l >= cursor) {
-       ret = l;
-       *stop = YES;
-     }
-   }];
-	if(ret == -1) {
-		ret = [self length]; // go to end
-	}
-	return ret;
-}
-
 - (CFIndex)ab_endOfWordGivenCursor:(CFIndex)cursor // if cursor is in word, return end of current word, if past, end of next word
 {
 	__block CFIndex ret = -1;
@@ -275,28 +237,30 @@ static NSAttributedString *killBuffer = nil;
 
 - (void)moveToBeginningOfLineAndModifySelection:(id)sender
 {
-	_selectionEnd = [TEXT ab_beginningOfLineGivenCursor:_selectionEnd];
+	_selectionEnd = AB_CTFrameGetIndexForBeginningOfLineWithCharIndex(self.ctFrame, _selectionEnd);
 	[self.view setNeedsDisplay];
   [self _scrollToIndex:MIN(_selectionStart, _selectionEnd)];
 }
 
 - (void)moveToEndOfLineAndModifySelection:(id)sender
 {
-	_selectionEnd = [TEXT ab_endOfLineGivenCursor:_selectionEnd];
+	_selectionEnd = AB_CTFrameGetIndexForEndingOfLineWithCharIndex(self.ctFrame, _selectionEnd);
 	[self.view setNeedsDisplay];
   [self _scrollToIndex:MAX(_selectionStart, _selectionEnd)];
 }
 
 - (void)moveToBeginningOfLine:(id)sender
 {
-	_selectionStart = _selectionEnd = [TEXT ab_beginningOfLineGivenCursor:MIN(_selectionEnd,_selectionStart)];
+	_selectionStart = _selectionEnd = AB_CTFrameGetIndexForBeginningOfLineWithCharIndex(self.ctFrame,
+                                                                                      MIN(_selectionEnd,_selectionStart));
 	[self.view setNeedsDisplay];
   [self _scrollToIndex:MIN(_selectionStart, _selectionEnd)];
 }
 
 - (void)moveToEndOfLine:(id)sender
 {
-	_selectionStart = _selectionEnd = [TEXT ab_endOfLineGivenCursor:MAX(_selectionEnd,_selectionStart)];
+	_selectionStart = _selectionEnd = AB_CTFrameGetIndexForEndingOfLineWithCharIndex(self.ctFrame,
+                                                                                   MAX(_selectionEnd,_selectionStart));
 	[self.view setNeedsDisplay];
   [self _scrollToIndex:MAX(_selectionStart, _selectionEnd)];
 }

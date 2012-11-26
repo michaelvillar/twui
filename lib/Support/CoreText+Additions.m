@@ -142,6 +142,36 @@ static inline BOOL RangeContainsIndex(CFRange range, CFIndex index)
 	return (a && b);
 }
 
+CFIndex AB_CTFrameGetIndexForBeginningOfLineWithCharIndex(CTFrameRef frame, CFIndex charIndex)
+{
+  NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
+  CFIndex linesCount = [lines count];
+  CFIndex totalCount = 0;
+  for(CFIndex i = 0; i < linesCount; ++i) {
+		CTLineRef line = (__bridge CTLineRef)[lines objectAtIndex:i];
+		CFIndex count = CTLineGetGlyphCount(line);
+    if(charIndex > totalCount && charIndex <= totalCount + count)
+      return totalCount;
+    totalCount += count;
+  }
+  return 0;
+}
+
+CFIndex AB_CTFrameGetIndexForEndingOfLineWithCharIndex(CTFrameRef frame, CFIndex charIndex)
+{
+  NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
+  CFIndex linesCount = [lines count];
+  CFIndex totalCount = 0;
+  for(CFIndex i = 0; i < linesCount; ++i) {
+		CTLineRef line = (__bridge CTLineRef)[lines objectAtIndex:i];
+		CFIndex count = CTLineGetGlyphCount(line);
+    if(charIndex >= totalCount && charIndex < totalCount + count)
+      return totalCount + count;
+    totalCount += count;
+  }
+  return totalCount;
+}
+
 void AB_CTFrameGetIndexForPositionInLine(NSString *string, CTFrameRef frame, CFIndex lineIndex, float xPosition, CFIndex *index)
 {
   NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
