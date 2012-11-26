@@ -146,7 +146,16 @@
 
 - (void)paste:(id)sender
 {
-	[self insertText:[[NSPasteboard generalPasteboard] stringForType:NSPasteboardTypeString]];
+  NSPasteboard *pboard = [NSPasteboard generalPasteboard];
+  NSString *type = [pboard availableTypeFromArray:
+                    [NSArray arrayWithObjects:
+                     NSPasteboardTypeString,
+                     NSURLPboardType,
+                     nil]];
+  if([type isEqualToString:NSPasteboardTypeString])
+    [self insertText:[pboard stringForType:type]];
+  else if([type isEqualToString:NSURLPboardType])
+    [self insertText:[NSURL URLFromPasteboard:pboard].absoluteString];
   [self _scrollToIndex:MAX(_selectionStart, _selectionEnd)];
 }
 
