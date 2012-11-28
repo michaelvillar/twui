@@ -329,7 +329,8 @@
   // Length of data
   while (YES)
   {
-    [self getBytes:1];
+    if(![self getBytes:1])
+      break;
     unsigned char cBuffer[1];
     [self.buffer getBytes:cBuffer length:1];
     NSUInteger dataLength = cBuffer[0];
