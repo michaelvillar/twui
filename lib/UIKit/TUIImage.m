@@ -343,7 +343,8 @@
         if(!animatedImage) {
           animatedImage = image;
         }
-        if (disposalMethod == MVGIFDisposalMethodDoNotDispose)
+        if (disposalMethod == MVGIFDisposalMethodDoNotDispose ||
+            disposalMethod == MVGIFDisposalMethodNone)
           [imagesToDrawBefore addObject:image];
       }
     }
