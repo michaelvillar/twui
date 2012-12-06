@@ -309,6 +309,7 @@
       int disposalMethod = ((NSNumber*)([[gifDecoder shouldDispose] objectAtIndex:i])).intValue;
       
       TUIImage *image = [TUIImage imageWithData:[gifDecoder dataFrameAtIndex:i]];
+      
       if(image && (imagesToDrawBefore.count > 0))
       {
         size_t width = image.size.width;
@@ -328,6 +329,9 @@
           CGContextDrawImage(ctx, r, ((TUIImage*)[imagesToDrawBefore objectAtIndex:j]).CGImage);
         }
         
+        CGRect frameRect = [(NSValue*)[gifDecoder.frameRects objectAtIndex:i] rectValue];
+        frameRect.origin.y = height - frameRect.origin.y - frameRect.size.height;
+        CGContextClipToRect(ctx, frameRect);
         CGContextDrawImage(ctx, r, image.CGImage);
         
         CGImageRef cgImage = CGBitmapContextCreateImage(ctx);
@@ -345,7 +349,10 @@
         }
         if (disposalMethod == MVGIFDisposalMethodDoNotDispose ||
             disposalMethod == MVGIFDisposalMethodNone)
+        {
+          [imagesToDrawBefore removeAllObjects];
           [imagesToDrawBefore addObject:image];
+        }
       }
     }
     

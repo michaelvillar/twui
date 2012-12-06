@@ -15,6 +15,7 @@
 @property (readonly, nonatomic) NSUInteger frameCount;
 @property (strong, readonly) NSMutableArray *delays;
 @property (strong, readonly) NSMutableArray *shouldDispose;
+@property (strong, readonly) NSMutableArray *frameRects;
 
 - (id)initWithData:(NSData*)data;
 - (NSData*)dataFrameAtIndex:(NSUInteger)index;

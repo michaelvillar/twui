@@ -21,6 +21,7 @@
 @property (readwrite) int colorS;
 @property (readwrite) int colorF;
 @property (readwrite, strong) NSMutableArray *shouldDispose;
+@property (readwrite, strong) NSMutableArray *frameRects;
 
 - (void)decode;
 - (bool)getBytes:(long)length;
@@ -46,7 +47,8 @@
             sorted            = sorted_,
             colorS            = colorS_,
             colorF            = colorF_,
-            shouldDispose     = shouldDispose_;
+            shouldDispose     = shouldDispose_,
+            frameRects        = frameRects_;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (id)initWithData:(NSData*)data
@@ -63,7 +65,8 @@
     framesData_ = [[NSMutableArray alloc] init];
     
     dataPointer_ = 0;
-    shouldDispose_ = [[NSMutableArray alloc] init];;
+    shouldDispose_ = [[NSMutableArray alloc] init];
+    frameRects_ = [[NSMutableArray alloc] init];
 
     [self decode];
   }
@@ -206,11 +209,12 @@
   [self getBytes:1];
   [self.buffer getBytes:cur length:1];
   
+  prev[0] = 0x21;
+  BOOL prevWas21;
+  
 	while (cur[0] != 0x00)
   {
-		// TODO: Known bug, the sequence F9 04 could occur in the Application Extension, we
-		//       should check whether this combo follows directly after the 21.
-		if (cur[0] == 0x04 && prev[0] == 0xF9)
+		if (prevWas21 && cur[0] == 0x04 && prev[0] == 0xF9)
 		{
 			[self getBytes:5];
       
@@ -239,6 +243,7 @@
 			break;
 		}
 		
+    prevWas21 = (prev[0] == 0x21);
 		prev[0] = cur[0];
     [self getBytes:1];
 		[self.buffer getBytes:cur length:1];
@@ -316,6 +321,13 @@
   size_t clength = [imageDescriptor length];
 	unsigned char cBuffer[clength];
 	[imageDescriptor getBytes:cBuffer length:clength];
+  
+  int imageLeftPosition = cBuffer[1] * 0x100 + cBuffer[0];
+  int imageTopPosition = cBuffer[3] * 0x100 + cBuffer[2];
+  int imageWidth = cBuffer[5] * 0x100 + cBuffer[4];
+  int imageHeight = cBuffer[7] * 0x100 + cBuffer[6];
+  CGRect frameRect = CGRectMake(imageLeftPosition, imageTopPosition, imageWidth, imageHeight);
+  [self.frameRects addObject:[NSValue valueWithRect:frameRect]];
 	
 	cBuffer[8] &= 0x40;
 	
