@@ -94,9 +94,16 @@
   
 	TUITableView *tableView = self.tableView;
   [self.nsWindow makeFirstResponder:tableView];
-	[tableView selectRowAtIndexPath:self.indexPath 
-                         animated:tableView.animateSelectionChanges 
-                   scrollPosition:TUITableViewScrollPositionNone];
+  
+  _tableViewCellFlags.highlighted = 1;
+  self.layer.zPosition = 5000; // 6000 is knob
+  [self setNeedsDisplay];
+  
+	if(![tableView.delegate respondsToSelector:@selector(tableView:shouldSelectRowAtIndexPath:forEvent:)] || [tableView.delegate tableView:tableView shouldSelectRowAtIndexPath:self.indexPath forEvent:event]){
+    [tableView selectRowAtIndexPath:self.indexPath
+                           animated:tableView.animateSelectionChanges
+                     scrollPosition:TUITableViewScrollPositionNone];
+  }
 
 	[super mouseDown:event]; // may make the text renderer first responder, so we want to do the selection before this
 	
@@ -129,6 +136,7 @@
   [self.tableView __mouseUpInCell:self offset:_mouseOffset event:event];
   
 	_tableViewCellFlags.highlighted = 0;
+  self.layer.zPosition = [self.tableView indexPathForCell:self].row;
 	[self setNeedsDisplay];
 	
 	if([self eventInside:event] && !dragging) {

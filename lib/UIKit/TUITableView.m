@@ -21,6 +21,7 @@
 
 // header views need to be above the cells at all times
 #define HEADER_Z_POSITION 1000 
+#define HIGHLIGHTED_CELL_Z_POSITION 5000 // 6000 is knob
 
 typedef struct {
 	CGFloat offset; // from beginning of section
@@ -791,6 +792,8 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 			cell.frame = [self rectForRowAtIndexPath:i];
       if([cell shouldForceZPosition])
         cell.layer.zPosition = cell.zPosition;
+      else if(cell.isSelected || cell.isHighlighted)
+        cell.layer.zPosition = HIGHLIGHTED_CELL_Z_POSITION;
       else
         cell.layer.zPosition = i.row;
 			[cell setNeedsLayout];
@@ -836,6 +839,8 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 			cell.frame = [self rectForRowAtIndexPath:i];
       if([cell shouldForceZPosition])
         cell.layer.zPosition = cell.zPosition;
+      else if(cell.isSelected || cell.isHighlighted)
+        cell.layer.zPosition = HIGHLIGHTED_CELL_Z_POSITION;
       else
         cell.layer.zPosition = i.row;
 			
@@ -1066,6 +1071,7 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 		 // should already be nil
 		_selectedIndexPath = indexPath;
 		[cell setNeedsDisplay];
+    cell.layer.zPosition = HIGHLIGHTED_CELL_Z_POSITION;
 		
 		// only notify when the selection actually changes
     if([self.delegate respondsToSelector:@selector(tableView:didSelectRowAtIndexPath:)]){
@@ -1091,6 +1097,7 @@ static NSInteger SortCells(TUITableViewCell *a, TUITableViewCell *b, void *ctx)
 		[cell setSelected:NO animated:animated];
 		_selectedIndexPath = nil;
 		[cell setNeedsDisplay];
+    cell.layer.zPosition = [self indexPathForCell:cell].row;
 		
 		// only notify when the selection actually changes
     if([self.delegate respondsToSelector:@selector(tableView:didDeselectRowAtIndexPath:)]){

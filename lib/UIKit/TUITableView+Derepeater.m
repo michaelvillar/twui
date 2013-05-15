@@ -44,7 +44,6 @@
 	
 	for(TUITableViewCell<ABDerepeaterTableViewCell> *cell in [self sortedVisibleCells]) {
 		zIndex--;
-		cell.layer.zPosition = zIndex;
 		CGRect cellFrame = cell.frame;
 		
 		NSString *identifier = [cell derepeaterIdentifier];

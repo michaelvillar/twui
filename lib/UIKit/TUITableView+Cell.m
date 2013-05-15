@@ -386,7 +386,7 @@
       ];
     }else{
       cell.frame = frame;
-      cell.layer.zPosition = 0;
+//      cell.layer.zPosition = 0;
       [self reloadData];
     }
     
@@ -394,7 +394,7 @@
     _currentDragToReorderIndexPath = nil;
     
   }else{
-    cell.layer.zPosition = 0;
+//    cell.layer.zPosition = 0;
   }
   
   _previousDragToReorderIndexPath = nil;
